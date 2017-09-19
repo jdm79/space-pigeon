@@ -1,5 +1,7 @@
 # spacePigeon
-http://79.170.44.81/spacepigeon.com/
+
+git clone git@github.com:jdm79/spacePigeon.git and open the html page in the browser. play Space Pigeon.
+
 flapping about in space - basic html5 game (first year university javascript project)
 
 one-level html5 canvas flappy bird-esque game, needs work... 
