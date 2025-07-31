@@ -13,7 +13,6 @@ var ST = {
   mouseY: undefined,
 
   bgImage: new Image(),
-  logoImage: new Image(),
 
   notificationPanel: new Image(),
   PanelPos: {
@@ -131,7 +130,6 @@ ST.start = function () {
 ST.addAssetsToLoader = function () {
   ST.loadingManager.addImageAsset("panel", "assets/panel_big1.png");
   ST.loadingManager.addImageAsset("background", "assets/backgroundSerif2.png");
-  ST.loadingManager.addImageAsset("logo", "assets/spacePigeon_title.png");
   ST.loadingManager.addImageAsset("pigeon", "assets/pigeonST.png");
 
   ST.loadingManager.addImageAsset("gameBackground", "assets/stars.png");
@@ -158,7 +156,6 @@ ST.onAssetsLoaded = function () {
 
   ST.PanelImg = ST.loadingManager.getLoadedImage("panel");
   ST.bgImage = ST.loadingManager.getLoadedImage("background");
-  ST.logoImage = ST.loadingManager.getLoadedImage("logo");
   ST.pigeonImage = ST.loadingManager.getLoadedImage("pigeon");
 
   ST.startSound = new Audio("assets/respirator.mp3");
@@ -203,7 +200,10 @@ ST.draw = function () {
   // Draw background twice for seamless scrolling
   ST.context.drawImage(ST.bgImage, 0, ST.backgroundY);
   ST.context.drawImage(ST.bgImage, 0, ST.backgroundY + ST.height);
-  ST.context.drawImage(ST.logoImage, 255, -10);
+  
+  // Draw animated title
+  ST.drawAnimatedTitle();
+  
   ST.context.drawImage(ST.pigeonImage, 260, 100);
 
   ST.drawTips();
@@ -275,6 +275,118 @@ ST.updateTips = function () {
     ST.currentTipIndex = (ST.currentTipIndex + 1) % ST.tipsList.length;
     ST.tipStartTime = currentTime;
   }
+};
+
+ST.drawAnimatedTitle = function () {
+  const currentTime = Date.now();
+  const title = "SPACE PIGEON";
+  
+  // Set up title font - larger than tips
+  ST.context.font = "48px VT323, monospace";
+  ST.context.textAlign = "center";
+  
+  // Position for title
+  const titleX = ST.width / 2;
+  const titleY = 65;
+  
+  // Create pulsing glow effect (same as tips)
+  const pulsePhase = (currentTime % 2000) / 2000; // 2 second cycle
+  const pulseAlpha = 0.3 + 0.7 * Math.sin(pulsePhase * Math.PI * 2);
+  
+  // Measure title for background
+  const titleWidth = ST.context.measureText(title).width;
+  const padding = 30;
+  const bgX = titleX - titleWidth / 2 - padding;
+  const bgY = titleY - 35;
+  const bgWidth = titleWidth + padding * 2;
+  const bgHeight = 50;
+  
+  // Draw outer glow (CRT effect)
+  ST.context.shadowBlur = 20;
+  ST.context.shadowColor = "#00FFFF"; // Cyan glow
+  
+  // Draw main background with gradient
+  const gradient = ST.context.createLinearGradient(bgX, bgY, bgX, bgY + bgHeight);
+  gradient.addColorStop(0, "#001122"); // Dark blue top
+  gradient.addColorStop(0.5, "#000000"); // Black middle
+  gradient.addColorStop(1, "#001122"); // Dark blue bottom
+  
+  ST.context.fillStyle = gradient;
+  ST.context.fillRect(bgX, bgY, bgWidth, bgHeight);
+  
+  // Draw neon border (pulsing cyan)
+  ST.context.strokeStyle = `rgba(0, 255, 255, ${pulseAlpha})`;
+  ST.context.lineWidth = 3;
+  ST.context.strokeRect(bgX, bgY, bgWidth, bgHeight);
+  
+  // Draw inner border (yellow)
+  ST.context.strokeStyle = "#FFFF00";
+  ST.context.lineWidth = 1;
+  ST.context.strokeRect(bgX + 3, bgY + 3, bgWidth - 6, bgHeight - 6);
+  
+  // Clear shadow for text
+  ST.context.shadowBlur = 0;
+  
+  // Add scanline effect
+  for (let i = 0; i < bgHeight; i += 4) {
+    ST.context.fillStyle = `rgba(0, 255, 255, ${0.15 * pulseAlpha})`;
+    ST.context.fillRect(bgX, bgY + i, bgWidth, 1);
+  }
+  
+  // Draw corner decorations
+  ST.context.fillStyle = "#00FFFF";
+  const cornerSize = 12;
+  // Top-left
+  ST.context.fillRect(bgX - 3, bgY - 3, cornerSize, 3);
+  ST.context.fillRect(bgX - 3, bgY - 3, 3, cornerSize);
+  // Top-right
+  ST.context.fillRect(bgX + bgWidth - cornerSize + 3, bgY - 3, cornerSize, 3);
+  ST.context.fillRect(bgX + bgWidth, bgY - 3, 3, cornerSize);
+  // Bottom-left
+  ST.context.fillRect(bgX - 3, bgY + bgHeight, cornerSize, 3);
+  ST.context.fillRect(bgX - 3, bgY + bgHeight - cornerSize + 3, 3, cornerSize);
+  // Bottom-right
+  ST.context.fillRect(bgX + bgWidth - cornerSize + 3, bgY + bgHeight, cornerSize, 3);
+  ST.context.fillRect(bgX + bgWidth, bgY + bgHeight - cornerSize + 3, 3, cornerSize);
+  
+  // Draw each letter with different colors
+  const letters = title.split('');
+  const letterColors = [
+    "#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FF8800", // SPACE 
+    "#FF0000", "#00FF00", "#FFFF00", "#FF00FF", "#00FFFF", "#FF8800"  // PIGEON
+  ];
+  
+  // Calculate letter positions
+  let letterX = bgX + padding;
+  
+  for (let i = 0; i < letters.length; i++) {
+    const letter = letters[i];
+    
+    // Skip space, but still move position
+    if (letter === ' ') {
+      letterX += ST.context.measureText(' ').width;
+      continue;
+    }
+    
+    // Color cycling for each letter (offset by letter index for wave effect)
+    const colorCycle = Math.floor(((currentTime + i * 500) % 4000) / 1000); // Each letter offset by 500ms
+    const cycleColors = ["#FFFF00", "#00FF00", "#FF8800", "#FF00FF"];
+    const baseColor = letterColors[i];
+    const currentColor = cycleColors[colorCycle];
+    
+    // Draw red shadow for each letter
+    ST.context.fillStyle = "#FF0000";
+    ST.context.fillText(letter, letterX + 3, titleY + 3);
+    
+    // Draw main letter
+    ST.context.fillStyle = currentColor;
+    ST.context.fillText(letter, letterX, titleY);
+    
+    // Move to next letter position
+    letterX += ST.context.measureText(letter).width;
+  }
+  
+  ST.context.textAlign = "left";
 };
 
 ST.drawTips = function () {
