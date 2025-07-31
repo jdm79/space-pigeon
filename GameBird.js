@@ -299,6 +299,9 @@ class SpacePigeonGame {
   }
 
   returnToMainMenu() {
+    // Clean up game touch controls
+    this.cleanupTouchControls();
+    
     // Stop all game sounds immediately
     if (this.backgroundMusic) {
       this.backgroundMusic.pause();
@@ -532,9 +535,11 @@ const Game = {
 // Add mobile touch controls method to the class
 SpacePigeonGame.prototype.setupGameTouchControls = function() {
   if ('ontouchstart' in window && this.canvas) {
-    // Handle touch for jumping (same as spacebar)
-    this.canvas.addEventListener('touchstart', (e) => {
+    // Store reference for cleanup
+    this.gameTouchStartHandler = (e) => {
       e.preventDefault();
+      e.stopPropagation(); // Prevent bubbling to other handlers
+      
       if (this.gameState === 'playing') {
         this.player.handleInput(32, true); // Simulate spacebar press
       } else if (this.gameState === 'gameOver') {
@@ -549,13 +554,26 @@ SpacePigeonGame.prototype.setupGameTouchControls = function() {
           }
         }
       }
-    }, { passive: false });
+    };
     
-    this.canvas.addEventListener('touchend', (e) => {
+    this.gameTouchEndHandler = (e) => {
       e.preventDefault();
+      e.stopPropagation();
       if (this.gameState === 'playing') {
         this.player.handleInput(32, false); // Simulate spacebar release
       }
-    }, { passive: false });
+    };
+    
+    // Add the game touch handlers
+    this.canvas.addEventListener('touchstart', this.gameTouchStartHandler, { passive: false });
+    this.canvas.addEventListener('touchend', this.gameTouchEndHandler, { passive: false });
+  }
+};
+
+// Clean up touch controls when returning to menu
+SpacePigeonGame.prototype.cleanupTouchControls = function() {
+  if (this.canvas && this.gameTouchStartHandler) {
+    this.canvas.removeEventListener('touchstart', this.gameTouchStartHandler);
+    this.canvas.removeEventListener('touchend', this.gameTouchEndHandler);
   }
 };

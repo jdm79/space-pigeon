@@ -496,26 +496,36 @@ ST.volumeControl = function () {
 // Mobile touch controls
 ST.setupTouchControls = function () {
   if ("ontouchstart" in window) {
-    // Prevent default touch behaviors
+    // Prevent default touch behaviors only for the document
     document.addEventListener("touchstart", function(e) {
-      e.preventDefault();
+      // Only prevent default for body/document level, not canvas
+      if (e.target === document.body || e.target === document.documentElement) {
+        e.preventDefault();
+      }
     }, { passive: false });
     
     document.addEventListener("touchmove", function(e) {
-      e.preventDefault();
+      if (e.target === document.body || e.target === document.documentElement) {
+        e.preventDefault();
+      }
     }, { passive: false });
     
-    // Handle touch for starting game (same as spacebar)
-    ST.canvas.addEventListener("touchstart", function(e) {
+    // Handle touch for starting game ONLY when on start screen
+    ST.startScreenTouchHandler = function(e) {
       e.preventDefault();
-      if (ST.assetsLoaded) {
+      // Only handle touch if we're still on the start screen (game not started)
+      if (ST.assetsLoaded && !ST.playButtonClicked) {
         if (ST.startSound) {
           ST.startSound.pause();
         }
         Game.start();
         ST.playButtonClicked = true;
+        // Remove start screen touch handler once game starts
+        ST.canvas.removeEventListener("touchstart", ST.startScreenTouchHandler);
       }
-    }, { passive: false });
+    };
+    
+    ST.canvas.addEventListener("touchstart", ST.startScreenTouchHandler, { passive: false });
   }
 };
 
