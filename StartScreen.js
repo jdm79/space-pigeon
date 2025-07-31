@@ -22,24 +22,23 @@ var ST = {
   },
   PanelImg: undefined,
 
-  playImage: new Image(),
-  instructImage: new Image(),
   creditsImage: new Image(),
 
   pigeonImage: new Image(),
   alienImage: new Image(),
 
   backgroundY: 0,
-  speed: 0.4,
+  speed: 0.2,
   startSound: null,
 
   loadingManager: null,
   assetsLoaded: false,
 
   tipsList: [
-    "Avoid the obstacles! Squeeze through gaps!",
-    "Collect points by flying through gaps!",
-    "Each level gets harder and faster!",
+    "Avoid the colourful space rectangles",
+    "Press SPACE to start - and to fly!",
+    "Collect points by flying through gaps",
+    "Each level gets harder and faster",
   ],
   currentTipIndex: 0,
   tipStartTime: Date.now(),
@@ -133,8 +132,6 @@ ST.addAssetsToLoader = function () {
   ST.loadingManager.addImageAsset("panel", "assets/panel_big1.png");
   ST.loadingManager.addImageAsset("background", "assets/backgroundSerif2.png");
   ST.loadingManager.addImageAsset("logo", "assets/spacePigeon_title.png");
-  ST.loadingManager.addImageAsset("playButton", "assets/space_play.png");
-  ST.loadingManager.addImageAsset("instructions", "assets/instructions.png");
   ST.loadingManager.addImageAsset("pigeon", "assets/pigeonST.png");
 
   ST.loadingManager.addImageAsset("gameBackground", "assets/stars.png");
@@ -162,8 +159,6 @@ ST.onAssetsLoaded = function () {
   ST.PanelImg = ST.loadingManager.getLoadedImage("panel");
   ST.bgImage = ST.loadingManager.getLoadedImage("background");
   ST.logoImage = ST.loadingManager.getLoadedImage("logo");
-  ST.playImage = ST.loadingManager.getLoadedImage("playButton");
-  ST.instructImage = ST.loadingManager.getLoadedImage("instructions");
   ST.pigeonImage = ST.loadingManager.getLoadedImage("pigeon");
 
   ST.startSound = new Audio("assets/respirator.mp3");
@@ -205,20 +200,18 @@ ST.draw = function () {
     return;
   }
 
+  // Draw background twice for seamless scrolling
   ST.context.drawImage(ST.bgImage, 0, ST.backgroundY);
+  ST.context.drawImage(ST.bgImage, 0, ST.backgroundY + ST.height);
   ST.context.drawImage(ST.logoImage, 255, -10);
   ST.context.drawImage(ST.pigeonImage, 260, 100);
-  ST.context.drawImage(ST.playImage, 260, 370);
-  ST.context.drawImage(ST.instructImage, 310, 420);
-
-  ST.context.drawImage(ST.playImage, ST.buttonX[0], ST.buttonY[0]);
 
   ST.drawTips();
 };
 
 ST.moveBg = function () {
   ST.backgroundY -= ST.speed;
-  if (ST.backgroundY == -1 * ST.height) {
+  if (ST.backgroundY <= -ST.height) {
     ST.backgroundY = 0;
   }
   if (ST.alienSize == ST.alienWidth) {
@@ -286,12 +279,87 @@ ST.updateTips = function () {
 
 ST.drawTips = function () {
   if (ST.tipsList.length > 0) {
-    ST.context.font = "16px Arial";
-    ST.context.fillStyle = "#000000";
+    const tip = ST.tipsList[ST.currentTipIndex];
+    const currentTime = Date.now();
+
+    // Set up text properties to measure dimensions
+    ST.context.font = "20px VT323, monospace";
     ST.context.textAlign = "center";
 
-    const tip = ST.tipsList[ST.currentTipIndex];
-    ST.context.fillText(tip, ST.width / 2, ST.height - 85);
+    // Measure text width for background
+    const textWidth = ST.context.measureText(tip).width;
+    const padding = 20;
+
+    // Calculate background rectangle position
+    const bgX = ST.width / 2 - textWidth / 2 - padding;
+    const bgY = ST.height - 110;
+    const bgWidth = textWidth + padding * 2;
+    const bgHeight = 35;
+
+    // Create pulsing glow effect
+    const pulsePhase = (currentTime % 2000) / 2000; // 2 second cycle
+    const pulseAlpha = 0.3 + 0.7 * Math.sin(pulsePhase * Math.PI * 2);
+    
+    // Draw outer glow (multiple layers for retro CRT effect)
+    ST.context.shadowBlur = 15;
+    ST.context.shadowColor = "#00FFFF"; // Cyan glow
+    
+    // Draw main background with gradient
+    const gradient = ST.context.createLinearGradient(bgX, bgY, bgX, bgY + bgHeight);
+    gradient.addColorStop(0, "#001122"); // Dark blue top
+    gradient.addColorStop(0.5, "#000000"); // Black middle
+    gradient.addColorStop(1, "#001122"); // Dark blue bottom
+    
+    ST.context.fillStyle = gradient;
+    ST.context.fillRect(bgX, bgY, bgWidth, bgHeight);
+    
+    // Draw neon border (classic arcade style)
+    ST.context.strokeStyle = `rgba(0, 255, 255, ${pulseAlpha})`; // Pulsing cyan
+    ST.context.lineWidth = 2;
+    ST.context.strokeRect(bgX, bgY, bgWidth, bgHeight);
+    
+    // Draw inner border
+    ST.context.strokeStyle = "#FFFF00"; // Yellow inner border
+    ST.context.lineWidth = 1;
+    ST.context.strokeRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4);
+    
+    // Clear shadow for text
+    ST.context.shadowBlur = 0;
+    
+    // Draw text with multiple color layers for depth (classic arcade text effect)
+    const textY = ST.height - 87;
+    
+    // Shadow layer (offset)
+    ST.context.fillStyle = "#FF0000"; // Red shadow
+    ST.context.fillText(tip, ST.width / 2 + 2, textY + 2);
+    
+    // Main text layer with cycling colors
+    const colorCycle = Math.floor((currentTime % 4000) / 1000); // 4 colors, 1 second each
+    const arcadeColors = ["#FFFF00", "#00FF00", "#FF8800", "#FF00FF"]; // Yellow, Green, Orange, Magenta
+    ST.context.fillStyle = arcadeColors[colorCycle];
+    ST.context.fillText(tip, ST.width / 2, textY);
+    
+    // Add scanline effect across the tips area
+    for (let i = 0; i < bgHeight; i += 4) {
+      ST.context.fillStyle = `rgba(0, 255, 255, ${0.1 * pulseAlpha})`;
+      ST.context.fillRect(bgX, bgY + i, bgWidth, 1);
+    }
+    
+    // Draw corner decorations (classic arcade style)
+    ST.context.fillStyle = "#00FFFF";
+    const cornerSize = 8;
+    // Top-left corner
+    ST.context.fillRect(bgX - 2, bgY - 2, cornerSize, 2);
+    ST.context.fillRect(bgX - 2, bgY - 2, 2, cornerSize);
+    // Top-right corner
+    ST.context.fillRect(bgX + bgWidth - cornerSize + 2, bgY - 2, cornerSize, 2);
+    ST.context.fillRect(bgX + bgWidth, bgY - 2, 2, cornerSize);
+    // Bottom-left corner
+    ST.context.fillRect(bgX - 2, bgY + bgHeight, cornerSize, 2);
+    ST.context.fillRect(bgX - 2, bgY + bgHeight - cornerSize + 2, 2, cornerSize);
+    // Bottom-right corner
+    ST.context.fillRect(bgX + bgWidth - cornerSize + 2, bgY + bgHeight, cornerSize, 2);
+    ST.context.fillRect(bgX + bgWidth, bgY + bgHeight - cornerSize + 2, 2, cornerSize);
 
     ST.context.textAlign = "left";
   }

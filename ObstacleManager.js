@@ -11,6 +11,7 @@ class ObstacleManager {
         this.maxGapSize = 160;
         this.obstacleSpacing = 400;
         this.nextObstacleX = 1000;
+        this.finishLineCreated = false;
         
         this.colors = [
             "#E0D873", "#E0DFDB", "#FBDB0C", "#BCC6CC", "#BFBFBF", 
@@ -64,6 +65,7 @@ class ObstacleManager {
         };
         
         this.obstacles.push(finishLine);
+        this.finishLineCreated = true;
     }
     
     update() {
@@ -73,8 +75,10 @@ class ObstacleManager {
         
         this.obstacles = this.obstacles.filter(obstacle => obstacle.x + obstacle.width > -100);
         
-        if (this.obstacles.length === 0 || 
-            this.obstacles[this.obstacles.length - 1].x < this.nextObstacleX - this.obstacleSpacing) {
+        // Only create new obstacles if finish line hasn't been created yet
+        if (!this.finishLineCreated && 
+            (this.obstacles.length === 0 || 
+             this.obstacles[this.obstacles.length - 1].x < this.nextObstacleX - this.obstacleSpacing)) {
             this.createObstacle(this.nextObstacleX);
             this.nextObstacleX += this.obstacleSpacing;
         }
@@ -124,10 +128,12 @@ class ObstacleManager {
     reset() {
         this.obstacles = [];
         this.nextObstacleX = 1000;
+        this.finishLineCreated = false;
     }
     
     generateLevel(levelData) {
         this.reset();
+        
         
         if (levelData.obstacles) {
             for (let obstacleData of levelData.obstacles) {

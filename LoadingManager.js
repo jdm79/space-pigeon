@@ -212,16 +212,16 @@ class LoadingManager {
     // Draw starfield background
     this.drawStarfield();
 
-    // Draw main loading text
-    this.context.font = "bold 36px Arial";
-    this.context.fillStyle = "#FFD700";
+    // Draw main loading text - bright yellow
+    this.context.font = "38px VT323, monospace";
+    this.context.fillStyle = "#FFFF00";
     this.context.textAlign = "center";
     this.context.fillText("SPACE PIGEON", width / 2, height / 2 - 120);
 
-    // Draw loading text with pulse effect
+    // Draw loading text with pulse effect - bright green
     const pulseAlpha = 0.5 + 0.5 * Math.sin(this.pulsePhase);
-    this.context.font = "24px Arial";
-    this.context.fillStyle = `rgba(255, 255, 255, ${pulseAlpha})`;
+    this.context.font = "26px VT323, monospace";
+    this.context.fillStyle = `rgba(0, 255, 0, ${pulseAlpha})`;
     this.context.fillText("Loading...", width / 2, height / 2 - 60);
 
     // Draw spinning loading indicator

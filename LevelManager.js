@@ -149,8 +149,8 @@ class LevelManager {
   drawLevelInfo(context, canvasWidth) {
     const level = this.getCurrentLevel();
 
-    context.font = "16px Arial";
-    context.fillStyle = "white";
+    context.font = "18px VT323, monospace";
+    context.fillStyle = "#FF8800"; // Bright orange
     context.fillText(`${level.name}`, 10, 25);
   }
 
@@ -177,9 +177,9 @@ class LevelManager {
     context.lineWidth = 1;
     context.strokeRect(x, y, barWidth, barHeight);
 
-    // Percentage text
-    context.font = "12px Arial";
-    context.fillStyle = "white";
+    // Percentage text - bright green
+    context.font = "14px VT323, monospace";
+    context.fillStyle = "#00FF00";
     context.fillText(`${progress}%`, x + barWidth + 5, y + 9);
   }
 
@@ -189,36 +189,39 @@ class LevelManager {
     context.fillStyle = "rgba(0, 0, 0, 0.8)";
     context.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    context.font = "48px Arial";
-    context.fillStyle = "#FFD700";
+    context.font = "50px VT323, monospace";
+    context.fillStyle = "#FFFF00"; // Bright yellow
     context.textAlign = "center";
     context.fillText("LEVEL COMPLETE!", canvasWidth / 2, canvasHeight / 2 - 60);
 
-    context.font = "24px Arial";
-    context.fillStyle = "white";
+    context.font = "26px VT323, monospace";
 
     if (this.isLastLevel()) {
+      context.fillStyle = "#FF0000"; // Bright red for congratulations
       context.fillText(
         "🎉 CONGRATULATIONS! 🎉",
         canvasWidth / 2,
         canvasHeight / 2 - 20
       );
+      context.fillStyle = "#00FF00"; // Green for completion
       context.fillText(
         "You completed all levels!",
         canvasWidth / 2,
         canvasHeight / 2 + 10
       );
       //   context.fillText(
-      //     "Press SPACE to play again",
+      //     " to play again",
       //     canvasWidth / 2,
       //     canvasHeight / 2 + 40
       //   );
     } else {
+      context.fillStyle = "#FF8800"; // Orange for next level
       context.fillText(
         `Get ready for Level ${this.currentLevel + 1}!`,
         canvasWidth / 2,
         canvasHeight / 2 - 20
       );
+      context.fillStyle = "#00FF00"; // Green for instructions
       context.fillText(
         "Press SPACE to continue",
         canvasWidth / 2,

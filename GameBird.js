@@ -114,8 +114,11 @@ class SpacePigeonGame {
   }
 
   initWithLoadedAssets(loadingManager) {
+    console.log("initWithLoadedAssets called with:", !!loadingManager);
     this.canvas = document.getElementById("myCanvas");
+    console.log("Canvas found:", !!this.canvas);
     this.canvasContext = this.canvas.getContext("2d");
+    console.log("Canvas context:", !!this.canvasContext);
     
     // Ensure canvas dimensions are properly set
     this.canvasWidth = this.canvas.width;
@@ -478,9 +481,9 @@ class SpacePigeonGame {
     const centerX = 400; // Center of the panel
     this.canvasContext.textAlign = "center";
 
-    // Title text
-    this.canvasContext.font = "24px Arial";
-    this.canvasContext.fillStyle = "white";
+    // Title text - bright red
+    this.canvasContext.font = "26px VT323, monospace";
+    this.canvasContext.fillStyle = "#FF0000";
     this.canvasContext.fillText("GAME OVER", centerX, 240);
 
     // Draw score information - using same center point
@@ -490,9 +493,9 @@ class SpacePigeonGame {
       this.previousHighScore
     );
 
-    // Instructions - same center point and alignment
-    this.canvasContext.font = "14px Arial";
-    this.canvasContext.fillStyle = "white";
+    // Instructions - bright green
+    this.canvasContext.font = "16px VT323, monospace";
+    this.canvasContext.fillStyle = "#00FF00";
     this.canvasContext.fillText("Press M to return to menu", centerX, 365);
 
     // Reset text alignment
@@ -509,11 +512,16 @@ let gameInstance = null;
 // Legacy start function for compatibility with StartScreen.js
 const Game = {
   start: function () {
+    console.log("Game.start() called");
     if (gameInstance) {
+      console.log("Clearing existing game instance");
       gameInstance = null;
     }
+    console.log("Creating new SpacePigeonGame instance");
     gameInstance = new SpacePigeonGame();
+    console.log("Loading manager available:", !!ST.loadingManager);
     // Pass the loading manager to use preloaded assets
     gameInstance.initWithLoadedAssets(ST.loadingManager);
+    console.log("Game initialization complete");
   },
 };
