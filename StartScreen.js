@@ -491,3 +491,35 @@ ST.volumeControl = function () {
       break;
   }
 };
+
+
+// Mobile touch controls
+ST.setupTouchControls = function () {
+  if ("ontouchstart" in window) {
+    // Prevent default touch behaviors
+    document.addEventListener("touchstart", function(e) {
+      e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener("touchmove", function(e) {
+      e.preventDefault();
+    }, { passive: false });
+    
+    // Handle touch for starting game (same as spacebar)
+    ST.canvas.addEventListener("touchstart", function(e) {
+      e.preventDefault();
+      if (ST.assetsLoaded) {
+        if (ST.startSound) {
+          ST.startSound.pause();
+        }
+        Game.start();
+        ST.playButtonClicked = true;
+      }
+    }, { passive: false });
+  }
+};
+
+// Initialize touch controls when DOM is ready
+document.addEventListener("DOMContentLoaded", function() {
+  setTimeout(ST.setupTouchControls, 100);
+});

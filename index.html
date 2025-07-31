@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Space Pigeon - The Pigeon Who Came BACK</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
     <script src="LoadingManager.js"></script>
     <script src="StartScreen.js"></script>
     <script src="Player.js"></script>
@@ -50,6 +50,58 @@
         #myCanvas {
           height: calc(100vh - 60px);
           width: calc((100vh - 60px) * 1.667);
+        }
+      }
+
+      /* Mobile-specific styles */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+          overflow: hidden;
+        }
+        
+        #myCanvas {
+          width: calc(100vw - 20px);
+          height: calc((100vw - 20px) * 0.6);
+          max-width: none;
+          max-height: none;
+          touch-action: manipulation;
+        }
+      }
+
+      /* Portrait orientation warning */
+      @media (max-width: 768px) and (orientation: portrait) {
+        #gameArea::before {
+          content: "🔄 Please rotate your device to landscape mode for the best experience! 🔄";
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0, 0, 0, 0.9);
+          color: #FFFF00;
+          font-family: 'VT323', monospace;
+          font-size: 18px;
+          padding: 20px;
+          border: 2px solid #00FFFF;
+          border-radius: 10px;
+          text-align: center;
+          z-index: 1000;
+          max-width: 90%;
+          line-height: 1.4;
+        }
+      }
+
+      /* Landscape mobile optimization */
+      @media (max-width: 768px) and (orientation: landscape) {
+        body {
+          padding: 5px;
+        }
+        
+        #myCanvas {
+          width: calc(100vw - 10px);
+          height: calc(100vh - 10px);
+          max-width: calc(100vh * 1.667);
+          max-height: calc(100vw * 0.6);
         }
       }
     </style>

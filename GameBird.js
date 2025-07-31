@@ -522,6 +522,40 @@ const Game = {
     console.log("Loading manager available:", !!ST.loadingManager);
     // Pass the loading manager to use preloaded assets
     gameInstance.initWithLoadedAssets(ST.loadingManager);
+    // Setup mobile touch controls
+    gameInstance.setupGameTouchControls();
     console.log("Game initialization complete");
   },
+};
+
+
+// Add mobile touch controls method to the class
+SpacePigeonGame.prototype.setupGameTouchControls = function() {
+  if ('ontouchstart' in window && this.canvas) {
+    // Handle touch for jumping (same as spacebar)
+    this.canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (this.gameState === 'playing') {
+        this.player.handleInput(32, true); // Simulate spacebar press
+      } else if (this.gameState === 'gameOver') {
+        this.returnToMainMenu(); // Same as M key
+      } else if (this.gameState === 'levelComplete') {
+        const result = this.levelManager.handleLevelCompleteInput(32); // Simulate spacebar
+        if (result) {
+          if (result.action === 'restart') {
+            this.restartGame();
+          } else if (result.action === 'nextLevel') {
+            this.startLevel();
+          }
+        }
+      }
+    }, { passive: false });
+    
+    this.canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      if (this.gameState === 'playing') {
+        this.player.handleInput(32, false); // Simulate spacebar release
+      }
+    }, { passive: false });
+  }
 };
