@@ -12,6 +12,14 @@ class SpacePigeonGame {
         this.levelManager = null;
         this.collisionManager = null;
         
+        // Track progress
+        this.distanceTraveled = 0;
+        
+        // Scoring system
+        this.score = 0;
+        this.passedObstacles = new Set(); // Track which obstacles we've passed
+        this.scoreManager = new ScoreManager();
+        
         // Background
         this.backgroundSprite = undefined;
         this.backgroundSpritePosition = { x: 0, y: 0 };
@@ -114,8 +122,8 @@ class SpacePigeonGame {
     handleKeyUp(keyCode) {
         if (keyCode === this.keys.SP) {
             this.player.handleInput(keyCode, false);
-        } else if (keyCode === this.keys.B && this.gameState === 'gameOver') {
-            this.restartGame();
+        } else if (keyCode === this.keys.M && this.gameState === 'gameOver') {
+            this.returnToMainMenu();
         }
         
         this.keyboard.keyDown = -1;
@@ -127,9 +135,9 @@ class SpacePigeonGame {
             const x = evt.clientX - rect.left;
             const y = evt.clientY - rect.top;
             
-            if (x >= this.buttonPos.x && x <= this.buttonPos.x + this.restartButton.width &&
-                y >= this.buttonPos.y && y <= this.buttonPos.y + this.restartButton.height) {
-                this.restartGame();
+            if (x >= this.currentButtonPos.x && x <= this.currentButtonPos.x + this.restartButton.width &&
+                y >= this.currentButtonPos.y && y <= this.currentButtonPos.y + this.restartButton.height) {
+                this.returnToMainMenu();
             }
         }
     }
@@ -160,6 +168,16 @@ class SpacePigeonGame {
         const levelData = this.levelManager.getCurrentLevel();
         this.obstacleManager.generateLevel(levelData);
         this.player.reset(50, 240);
+        this.distanceTraveled = 0; // Reset progress for new level
+        
+        // Reset score only for level 1 (new game)
+        if (this.levelManager.getCurrentLevelNumber() === 1) {
+            this.scoreManager.resetCurrentScore();
+            this.passedObstacles.clear();
+        }
+        
+        // Restart background music for new level
+        this.backgroundMusic.currentTime = 0; // Reset to beginning
         this.backgroundMusic.volume = 0.4;
         this.backgroundMusic.play();
     }
@@ -168,6 +186,18 @@ class SpacePigeonGame {
         this.levelManager.resetToFirstLevel();
         this.gameState = 'playing';
         this.startLevel();
+    }
+    
+    returnToMainMenu() {
+        // Stop all game sounds
+        this.backgroundMusic.pause();
+        this.sadMusic.pause();
+        
+        // Reset game state
+        this.levelManager.resetToFirstLevel();
+        
+        // Reload the page to return to start screen
+        location.reload();
     }
 
     
@@ -189,10 +219,31 @@ class SpacePigeonGame {
             0, 0, sprite.width, sprite.height);
         this.canvasContext.restore();
     }
+    
+    updateScore(obstacles) {
+        const playerRightEdge = this.player.position.x + 64; // Player width
+        
+        for (let obstacle of obstacles) {
+            if (obstacle.type === 'obstacle' && obstacle.id.includes('_top_')) {
+                // Only count top obstacles to avoid double counting pairs
+                const obstacleLeftEdge = obstacle.x;
+                const obstacleId = obstacle.id.split('_top_')[1]; // Get unique part of ID
+                
+                // Check if pigeon's right edge has passed obstacle's left edge
+                if (playerRightEdge > obstacleLeftEdge && !this.passedObstacles.has(obstacleId)) {
+                    this.passedObstacles.add(obstacleId);
+                    this.scoreManager.addPoints(1); // 1 point per gap passed
+                }
+            }
+        }
+    }
 
     
     update() {
         if (this.gameState === 'playing') {
+            // Update distance traveled (simulate forward movement)
+            this.distanceTraveled += this.obstacleManager.scrollSpeed; // Match actual scroll speed
+            
             // Update player
             this.player.update();
             
@@ -203,18 +254,25 @@ class SpacePigeonGame {
             const obstacles = this.obstacleManager.getObstacles();
             const collisionData = this.collisionManager.checkPlayerObstacleCollisions(this.player, obstacles);
             
+            // Update score based on passed obstacles
+            this.updateScore(obstacles);
+            
             // Handle obstacle collisions (game over)
             if (this.collisionManager.handleObstacleCollision(collisionData)) {
                 this.gameState = 'gameOver';
                 this.backgroundMusic.volume = 0.0;
                 this.sadMusic.play();
+                // Save score when game ends
+                this.previousHighScore = this.scoreManager.getHighScore();
+                this.isNewHighScore = this.scoreManager.saveScore();
                 return;
             }
             
             // Handle finish line collisions (level complete)
-            if (this.collisionManager.handleFinishLineCollision(collisionData, this.levelManager, this.player.position.x)) {
+            if (this.collisionManager.handleFinishLineCollision(collisionData, this.levelManager, this.distanceTraveled)) {
                 this.gameState = 'levelComplete';
-                this.backgroundMusic.volume = 0.2;
+                // Stop background music immediately when hitting finish line
+                this.backgroundMusic.pause();
             }
             
             // Update background
@@ -246,7 +304,8 @@ class SpacePigeonGame {
         
         // Draw UI
         this.levelManager.drawLevelInfo(this.canvasContext, this.canvas.width);
-        this.levelManager.drawProgressBar(this.canvasContext, this.player.position.x, this.canvas.width, this.canvas.height);
+        this.levelManager.drawProgressBar(this.canvasContext, this.distanceTraveled, this.canvas.width, this.canvas.height);
+        this.scoreManager.drawScore(this.canvasContext, this.canvas.width, this.canvas.height);
         
         // Draw game state specific UI
         if (this.gameState === 'gameOver') {
@@ -262,15 +321,31 @@ class SpacePigeonGame {
     }
     
     drawGameOver() {
-        this.canvasContext.drawImage(this.gameOverPanel, this.panelPos.x, this.panelPos.y);
+        // Draw the panel background
+        this.canvasContext.drawImage(this.gameOverPanel, 220, 200);
         
-        this.canvasContext.font = "20px 'Orator Std'";
+        // Set consistent centering for all text
+        const centerX = 400; // Center of the panel
+        this.canvasContext.textAlign = "center";
+        
+        // Title text
+        this.canvasContext.font = "24px Arial";
         this.canvasContext.fillStyle = "white";
-        this.canvasContext.fillText("Pigeon Dead", 350, 280);
-        this.canvasContext.fillText("Game Over", 360, 320);
-        this.canvasContext.fillText("Press B to Play Again", 300, 360);
+        this.canvasContext.fillText("GAME OVER", centerX, 240);
         
-        this.canvasContext.drawImage(this.restartButton, this.buttonPos.x, this.buttonPos.y);
+        // Draw score information - using same center point
+        this.scoreManager.drawGameOverScore(this.canvasContext, this.isNewHighScore, this.previousHighScore);
+        
+        // Instructions - same center point and alignment
+        this.canvasContext.font = "14px Arial";
+        this.canvasContext.fillStyle = "white";
+        this.canvasContext.fillText("Press M to return to menu", centerX, 365);
+        
+        // Reset text alignment
+        this.canvasContext.textAlign = "left";
+        
+        // Store a dummy position for click detection (not used)
+        this.currentButtonPos = { x: 350, y: 360 };
     }
 }
 

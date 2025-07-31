@@ -24,13 +24,17 @@ class ObstacleManager {
         const gapSize = this.minGapSize + Math.random() * (this.maxGapSize - this.minGapSize);
         const gapY = 50 + Math.random() * (this.canvasHeight - gapSize - 100);
         
+        // Randomize colors for each obstacle pair
+        const topColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+        const bottomColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+        
         const topObstacle = {
             id: `obstacle_top_${Date.now()}_${Math.random()}`,
             x: x,
             y: 0,
             width: this.obstacleWidth,
             height: gapY,
-            color: this.colors[Math.floor(Math.random() * this.colors.length)],
+            color: topColor,
             type: 'obstacle'
         };
         
@@ -40,7 +44,7 @@ class ObstacleManager {
             y: gapY + gapSize,
             width: this.obstacleWidth,
             height: this.canvasHeight - (gapY + gapSize),
-            color: this.colors[Math.floor(Math.random() * this.colors.length)],
+            color: bottomColor,
             type: 'obstacle'
         };
         

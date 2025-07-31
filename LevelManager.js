@@ -8,54 +8,62 @@ class LevelManager {
         this.finishSound.src = "assets/cheering.mp3";
         this.finishSound.volume = 0.8;
         
-        this.levels = {
-            1: {
-                name: "Level 1: Learning to Fly",
-                scrollSpeed: 4,
-                obstacleSpacing: 400,
-                gapSize: { min: 140, max: 160 },
-                finishLineX: 6000,
-                obstacles: [
-                    { x: 1000 }, { x: 1400 }, { x: 1800 }, { x: 2200 }, 
-                    { x: 2600 }, { x: 3000 }, { x: 3450 }, { x: 3900 }, 
-                    { x: 4300 }, { x: 4700 }, { x: 5100 }, { x: 5500 }
-                ]
-            },
-            2: {
-                name: "Level 2: Space Gauntlet",
-                scrollSpeed: 5,
-                obstacleSpacing: 350,
-                gapSize: { min: 130, max: 150 },
-                finishLineX: 7000,
-                obstacles: [
-                    { x: 1000 }, { x: 1300 }, { x: 1600 }, { x: 1900 }, 
-                    { x: 2200 }, { x: 2500 }, { x: 2800 }, { x: 3100 }, 
-                    { x: 3400 }, { x: 3700 }, { x: 4000 }, { x: 4300 },
-                    { x: 4600 }, { x: 4900 }, { x: 5200 }, { x: 5500 },
-                    { x: 5800 }, { x: 6100 }, { x: 6400 }
-                ]
-            },
-            3: {
-                name: "Level 3: Pigeon Nightmare",
-                scrollSpeed: 6,
-                obstacleSpacing: 300,
-                gapSize: { min: 120, max: 140 },
-                finishLineX: 8000,
-                obstacles: [
-                    { x: 1000 }, { x: 1250 }, { x: 1500 }, { x: 1750 }, 
-                    { x: 2000 }, { x: 2250 }, { x: 2500 }, { x: 2750 }, 
-                    { x: 3000 }, { x: 3250 }, { x: 3500 }, { x: 3750 },
-                    { x: 4000 }, { x: 4250 }, { x: 4500 }, { x: 4750 },
-                    { x: 5000 }, { x: 5250 }, { x: 5500 }, { x: 5750 },
-                    { x: 6000 }, { x: 6250 }, { x: 6500 }, { x: 6750 },
-                    { x: 7000 }, { x: 7250 }, { x: 7500 }
-                ]
-            }
+        // Infinite level system - levels are generated dynamically
+        this.baseLevels = {
+            1: { obstacleCount: 12, baseSpeed: 4.0, baseDistance: 6000 },
+            2: { obstacleCount: 19, baseSpeed: 4.2, baseDistance: 6100 },
+            3: { obstacleCount: 20, baseSpeed: 4.4, baseDistance: 6200 }
         };
     }
     
     getCurrentLevel() {
-        return this.levels[this.currentLevel];
+        return this.generateLevel(this.currentLevel);
+    }
+    
+    generateLevel(levelNumber) {
+        // Progressive difficulty formula:
+        // Speed: 4.0 + (level - 1) * 0.2
+        // Distance: 6000 + (level - 1) * 100  
+        // Obstacles: 12 + (level - 1) * 1
+        
+        const scrollSpeed = 4.0 + (levelNumber - 1) * 0.2;
+        const finishLineX = 6000 + (levelNumber - 1) * 100;
+        const obstacleCount = 12 + (levelNumber - 1);
+        
+        // Generate obstacle positions dynamically
+        const obstacles = [];
+        const spacing = (finishLineX - 1000) / obstacleCount; // Distribute evenly
+        
+        for (let i = 0; i < obstacleCount; i++) {
+            obstacles.push({ x: 1000 + (i * spacing) });
+        }
+        
+        return {
+            name: `Level ${levelNumber}: ${this.getLevelName(levelNumber)}`,
+            scrollSpeed: Math.round(scrollSpeed * 10) / 10, // Round to 1 decimal
+            obstacleSpacing: Math.max(250, 400 - (levelNumber * 5)), // Decrease spacing slightly
+            gapSize: { min: 135, max: 160 }, // Fixed gap range as requested
+            finishLineX: finishLineX,
+            obstacles: obstacles
+        };
+    }
+    
+    getLevelName(levelNumber) {
+        const names = [
+            "Learning to Fly", "Space Gauntlet", "Pigeon Nightmare", "Stellar Challenge", 
+            "Asteroid Field", "Cosmic Storm", "Nebula Run", "Black Hole Escape",
+            "Meteor Shower", "Solar Flare", "Galactic Drift", "Quantum Leap"
+        ];
+        
+        if (levelNumber <= names.length) {
+            return names[levelNumber - 1];
+        }
+        
+        // For levels beyond predefined names
+        const themes = ["Inferno", "Chaos", "Vortex", "Maelstrom", "Apocalypse", "Oblivion"];
+        const themeIndex = (levelNumber - names.length - 1) % themes.length;
+        const tier = Math.floor((levelNumber - names.length - 1) / themes.length) + 1;
+        return `${themes[themeIndex]} ${tier}`;
     }
     
     getCurrentLevelNumber() {
@@ -63,11 +71,11 @@ class LevelManager {
     }
     
     getTotalLevels() {
-        return Object.keys(this.levels).length;
+        return "∞"; // Infinite levels
     }
     
     isLastLevel() {
-        return this.currentLevel >= this.getTotalLevels();
+        return false; // Never the last level in infinite mode
     }
     
     completeLevel() {
@@ -100,10 +108,13 @@ class LevelManager {
         return playerX >= finishLineX - tolerance && !this.levelComplete;
     }
     
-    getLevelProgress(playerX) {
+    getLevelProgress(distanceTraveled) {
         const level = this.getCurrentLevel();
-        const totalDistance = level.finishLineX;
-        const progress = Math.min(playerX / totalDistance, 1);
+        // Progress should hit 100% when pigeon's right edge (x=50 + width) reaches finish line's left edge (finishLineX)
+        // So the pigeon needs to travel: finishLineX - 50 - pigeonWidth
+        const pigeonWidth = 64; // Default pigeon width from Player.js
+        const totalDistance = level.finishLineX - 50 - pigeonWidth;
+        const progress = Math.min(distanceTraveled / totalDistance, 0.99);
         return Math.round(progress * 100);
     }
     
@@ -113,28 +124,33 @@ class LevelManager {
         context.font = "16px Arial";
         context.fillStyle = "white";
         context.fillText(`${level.name}`, 10, 25);
-        context.fillText(`Level ${this.currentLevel}/${this.getTotalLevels()}`, 10, 45);
     }
     
-    drawProgressBar(context, playerX, canvasWidth, canvasHeight) {
-        const progress = this.getLevelProgress(playerX);
-        const barWidth = 200;
-        const barHeight = 10;
-        const x = canvasWidth - barWidth - 20;
+    drawProgressBar(context, distanceTraveled, canvasWidth, canvasHeight) {
+        // Show 100% only when level is actually complete, otherwise use calculated progress
+        const progress = this.isLevelComplete() ? 100 : this.getLevelProgress(distanceTraveled);
+        const barWidth = 150;
+        const barHeight = 12;
+        const x = canvasWidth - barWidth - 80; // Move further left to show percentage
         const y = 20;
         
-        context.fillStyle = "rgba(0, 0, 0, 0.5)";
+        // Background
+        context.fillStyle = "rgba(0, 0, 0, 0.7)";
         context.fillRect(x, y, barWidth, barHeight);
         
+        // Progress fill
         context.fillStyle = "#00FF00";
         context.fillRect(x, y, (barWidth * progress) / 100, barHeight);
         
+        // Border
         context.strokeStyle = "white";
+        context.lineWidth = 1;
         context.strokeRect(x, y, barWidth, barHeight);
         
+        // Percentage text
         context.font = "12px Arial";
         context.fillStyle = "white";
-        context.fillText(`${progress}%`, x + barWidth + 10, y + 8);
+        context.fillText(`${progress}%`, x + barWidth + 5, y + 9);
     }
     
     drawLevelComplete(context, canvasWidth, canvasHeight) {
@@ -165,6 +181,10 @@ class LevelManager {
     
     handleLevelCompleteInput(keyCode) {
         if (keyCode === 32 && this.levelComplete) { // Space key
+            // Stop the cheering music when proceeding to next level
+            this.finishSound.pause();
+            this.finishSound.currentTime = 0; // Reset to beginning for next time
+            
             if (this.isLastLevel()) {
                 this.resetToFirstLevel();
                 return { action: 'restart' };

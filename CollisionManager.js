@@ -57,13 +57,10 @@ class CollisionManager {
     }
     
     handleFinishLineCollision(collisionData, levelManager, playerX) {
-        if (collisionData.hasFinishLineCollision) {
-            const level = levelManager.getCurrentLevel();
-            if (levelManager.checkFinishLine(playerX, level.finishLineX)) {
-                levelManager.completeLevel();
-                console.log("Player reached finish line!");
-                return true;
-            }
+        if (collisionData.hasFinishLineCollision && !levelManager.isLevelComplete()) {
+            levelManager.completeLevel();
+            console.log("Player reached finish line!");
+            return true;
         }
         return false;
     }
