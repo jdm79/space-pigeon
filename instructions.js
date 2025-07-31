@@ -146,70 +146,6 @@ Game1.update = function ()
 	Game1.rectangle24PositionX -=5;
 	Game1.rectangle25PositionX -=5;
 	
-	/* all this 'if' statement is if we want the green things to come through again. but that makes it repetitive. leave for now until better idea how to use them.
-	
-	if(Game1.rectangle1PositionX<=-100){
-		
-		Game1.rectangle1PositionY = 0  //Math.floor((Math.random() * 200) + 1);
-		   //Game1.rectangle1PositionY+ Math.floor((Math.random() * 200) + 1);
-		Game1.rectangle1PositionX=800;
-		
-		//console.log(Game1.rectangle1PositionX);
-		console.log(Game1.rectangle2PositionY);
-	}
-	
-	if(Game1.rectangle2PositionX<=-100 ){
-		Game1.rectangle2PositionY+ Math.floor((Math.random() * 200) + 1);
-		Game1.rectangle2PositionX=800;
-		
-	}
-
-    if(Game1.rectangle3PositionX<=-100 ){
-		Game1.rectangle3PositionY+ Math.floor((Math.random() * 200) + 1);
-		Game1.rectangle3PositionX=800;
-		
-	}
-	if(Game1.rectangle4PositionX<=-100 ){
-		Game1.rectangle4PositionY+ Math.floor((Math.random() * 200) + 1);
-		Game1.rectangle4PositionX=800;
-		
-	}
-
-    if(Game1.rectangle5PositionX<=-100 ){
-		Game1.rectangle5PositionY+ Math.floor((Math.random() * 200) + 1);
-		Game1.rectangle5PositionX=800;
-		
-	}
-    if(Game1.rectangle6PositionX<=-100 ){
-		Game1.rectangle6PositionY+ Math.floor((Math.random() * 200) + 1);
-		Game1.rectangle6PositionX=800;
-		
-	}
-
-  */
-  
-  //bounding box collision detection algorithm 
-	/*A bounding box collision detection algorithm takes two objects 
-	and checks to see if the bounds of the first object are within the bounds of the second object. 
-	It requires four checks, one for each edge of the bounding box*/
-	//-------------------------
-	/* if (Game1.img.x < Game1.rect1.x + Game1.rect1.w &&
-        Game1.img.x + Game1.img.w > Game1.rect1.x &&
-        Game1.img.y < Game1.rect1.y + Game1.rect1.h &&
-        Game1.img.h + Game1.img.y > Game1.rect1.y) {
-        // collision detected!
-		collisionColour1="red";
-		collisionColour2="red";
-        console.log("collisions detected");
-    } else {
-        // no collision
-		collisionColour1="Blue";
-		collisionColour2="green";
-        console.log("No collisions yet");
-	
-	//-------------------------
-	}
-  */
   
   
   
@@ -305,7 +241,6 @@ Game1.volumeControl = function(){
 	{
 		case Game1.keys.P :
 			Game1.backgroundMusic.pause();
-			console.log("pause")
 			
 		break;
 		
@@ -335,7 +270,6 @@ Game1.startJump = function()
     if(Game1.onGround)
     {
         Game1.velocityY = -50.0;
-		console.log(Game1.velocityY)
         Game1.onGround = true;//changed this to true, to get the flappy bird effect of being able to jump, even when not on the ground. flying, in essence.
     }
 }

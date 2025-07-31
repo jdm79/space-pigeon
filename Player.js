@@ -10,7 +10,9 @@ class Player {
     this.onGround = false;
 
     this.image = new Image();
-    this.image.src = imageSrc;
+    if (imageSrc) {
+      this.image.src = imageSrc;
+    }
 
     this.isKeyPressed = false;
   }
