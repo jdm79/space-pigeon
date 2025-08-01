@@ -106,10 +106,10 @@
         }
       }
 
-      /* Force landscape orientation on mobile */
+      /* Force landscape orientation on mobile - rotate so game right is at phone bottom */
       @media (max-width: 768px) and (orientation: portrait) {
         html {
-          transform: rotate(90deg);
+          transform: rotate(-90deg);
           transform-origin: center center;
           width: 100vh;
           height: 100vw;
@@ -120,7 +120,7 @@
         }
         
         body {
-          transform: rotate(90deg);
+          transform: rotate(-90deg);
           transform-origin: center center;
           width: 100vh;
           height: 100vw;
@@ -245,15 +245,18 @@
           setViewportHeight();
           window.addEventListener('resize', setViewportHeight);
           
-          // Lock to landscape orientation if supported
+          // Lock to landscape orientation if supported (prefer landscape-primary for correct rotation)
           if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(() => {});
+            screen.orientation.lock('landscape-primary').catch(() => {
+              // Fallback to any landscape if primary fails
+              screen.orientation.lock('landscape').catch(() => {});
+            });
           } else if (screen.lockOrientation) {
-            screen.lockOrientation('landscape');
+            screen.lockOrientation('landscape-primary') || screen.lockOrientation('landscape');
           } else if (screen.webkitLockOrientation) {
-            screen.webkitLockOrientation('landscape');
+            screen.webkitLockOrientation('landscape-primary') || screen.webkitLockOrientation('landscape');
           } else if (screen.mozLockOrientation) {
-            screen.mozLockOrientation('landscape');
+            screen.mozLockOrientation('landscape-primary') || screen.mozLockOrientation('landscape');
           }
           
           // Hide address bar on mobile browsers

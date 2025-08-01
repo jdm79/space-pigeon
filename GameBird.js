@@ -226,9 +226,11 @@ class SpacePigeonGame {
 
   handleKeyUp(keyCode) {
     if (keyCode === this.keys.SP) {
-      this.player.handleInput(keyCode, false);
-    } else if (keyCode === this.keys.SP && this.gameState === "gameOver") {
-      this.returnToMainMenu();
+      if (this.gameState === "gameOver") {
+        this.returnToMainMenu();
+      } else {
+        this.player.handleInput(keyCode, false);
+      }
     }
 
     this.keyboard.keyDown = -1;
