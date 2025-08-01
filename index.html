@@ -2,9 +2,13 @@
 <html>
   <head>
     <title>Space Pigeon - The Pigeon Who Came BACK</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimal-ui" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimal-ui, viewport-fit=cover" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Space Pigeon">
+    <meta name="theme-color" content="#000000">
+    <meta name="msapplication-navbutton-color" content="#000000">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="LoadingManager.js"></script>
     <script src="StartScreen.js"></script>
@@ -25,6 +29,7 @@
       html, body {
         width: 100%;
         height: 100%;
+        height: calc(var(--vh, 1vh) * 100);
         overflow: hidden;
         position: fixed;
         background: #111;
@@ -82,6 +87,7 @@
         #gameArea {
           width: 100vw;
           height: 100vh;
+          height: calc(var(--vh, 1vh) * 100);
           position: fixed;
           top: 0;
           left: 0;
@@ -90,6 +96,7 @@
         #myCanvas {
           width: 100vw;
           height: 100vh;
+          height: calc(var(--vh, 1vh) * 100);
           max-width: none;
           max-height: none;
           touch-action: none;
@@ -127,6 +134,7 @@
         #gameArea {
           width: 100vh;
           height: 100vw;
+          height: calc(var(--vh, 1vh) * 100);
           position: fixed;
           top: 0;
           left: 0;
@@ -135,6 +143,7 @@
         #myCanvas {
           width: 100vh;
           height: 100vw;
+          height: calc(var(--vh, 1vh) * 100);
           position: fixed;
           top: 0;
           left: 0;
@@ -155,6 +164,7 @@
         #gameArea {
           width: 100vw;
           height: 100vh;
+          height: calc(var(--vh, 1vh) * 100);
           position: fixed;
           top: 0;
           left: 0;
@@ -163,6 +173,7 @@
         #myCanvas {
           width: 100vw;
           height: 100vh;
+          height: calc(var(--vh, 1vh) * 100);
           position: fixed;
           top: 0;
           left: 0;
@@ -183,21 +194,56 @@
     </div>
     
     <script>
-      // Mobile landscape orientation and full-screen handling
-      function handleMobileOrientation() {
+      // Enhanced mobile fullscreen and orientation handling
+      let fullscreenAttempted = false;
+      let isFullscreenActive = false;
+      
+      function enterFullscreen() {
+        if (fullscreenAttempted) return;
+        fullscreenAttempted = true;
+        
+        const element = document.documentElement;
+        
+        if (element.requestFullscreen) {
+          element.requestFullscreen().then(() => {
+            isFullscreenActive = true;
+          }).catch(() => {});
+        } else if (element.webkitRequestFullscreen) {
+          element.webkitRequestFullscreen();
+          isFullscreenActive = true;
+        } else if (element.mozRequestFullScreen) {
+          element.mozRequestFullScreen();
+          isFullscreenActive = true;
+        } else if (element.msRequestFullscreen) {
+          element.msRequestFullscreen();
+          isFullscreenActive = true;
+        }
+      }
+      
+      function handleMobileOptimizations() {
         if (window.innerWidth <= 768) {
-          // Prevent scrolling and zooming on mobile
+          // Prevent all scrolling behaviors
           document.body.style.overflow = 'hidden';
           document.documentElement.style.overflow = 'hidden';
+          document.body.style.position = 'fixed';
+          document.body.style.width = '100%';
+          document.body.style.height = '100%';
           
-          // Try to enable full-screen mode on mobile
-          if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(() => {});
-          } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen().catch(() => {});
-          } else if (document.documentElement.mozRequestFullScreen) {
-            document.documentElement.mozRequestFullScreen().catch(() => {});
-          }
+          // Set viewport height accounting for mobile browser bars
+          const setViewportHeight = () => {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+            
+            // Force canvas to use real viewport height
+            const canvas = document.getElementById('myCanvas');
+            if (canvas) {
+              canvas.style.height = `${window.innerHeight}px`;
+              canvas.style.width = `${window.innerWidth}px`;
+            }
+          };
+          
+          setViewportHeight();
+          window.addEventListener('resize', setViewportHeight);
           
           // Lock to landscape orientation if supported
           if (screen.orientation && screen.orientation.lock) {
@@ -209,17 +255,44 @@
           } else if (screen.mozLockOrientation) {
             screen.mozLockOrientation('landscape');
           }
+          
+          // Hide address bar on mobile browsers
+          setTimeout(() => {
+            window.scrollTo(0, 1);
+            window.scrollTo(0, 0);
+          }, 500);
         }
       }
       
+      // Handle fullscreen changes
+      function handleFullscreenChange() {
+        isFullscreenActive = !!(document.fullscreenElement || 
+                               document.webkitFullscreenElement || 
+                               document.mozFullScreenElement || 
+                               document.msFullscreenElement);
+      }
+      
+      // Add fullscreen event listeners
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+      
       // Handle orientation changes
       window.addEventListener('orientationchange', function() {
-        setTimeout(handleMobileOrientation, 100);
+        setTimeout(() => {
+          handleMobileOptimizations();
+          if (window.innerWidth <= 768 && !isFullscreenActive) {
+            // Hide address bar again after orientation change
+            window.scrollTo(0, 1);
+            setTimeout(() => window.scrollTo(0, 0), 100);
+          }
+        }, 100);
       });
       
       // Initial setup
       document.addEventListener('DOMContentLoaded', function() {
-        handleMobileOrientation();
+        handleMobileOptimizations();
         
         // Additional mobile-specific event handlers
         if (window.innerWidth <= 768) {
@@ -240,6 +313,28 @@
               e.preventDefault();
             }
           }, { passive: false });
+          
+          // Try to enter fullscreen on first user interaction
+          const enterFullscreenOnTouch = () => {
+            if (!fullscreenAttempted) {
+              enterFullscreen();
+            }
+          };
+          
+          document.addEventListener('touchstart', enterFullscreenOnTouch, { once: true });
+          document.addEventListener('click', enterFullscreenOnTouch, { once: true });
+        }
+      });
+      
+      // Handle visibility changes (for when user switches tabs/apps)
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && window.innerWidth <= 768) {
+          setTimeout(() => {
+            handleMobileOptimizations();
+            // Try to hide address bar again
+            window.scrollTo(0, 1);
+            setTimeout(() => window.scrollTo(0, 0), 100);
+          }, 200);
         }
       });
     </script>
