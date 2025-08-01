@@ -150,13 +150,13 @@ ST.addAssetsToLoader = function () {
   ST.loadingManager.addImageAsset("gameOverPanel", "assets/panel_big1.png");
   ST.loadingManager.addImageAsset("playAgainButton", "assets/b_to_play.png");
 
-  ST.loadingManager.addAudioAsset("startMusic", "assets/respirator.mp3");
-  ST.loadingManager.addAudioAsset("gameMusic", "assets/killa.mp3");
-  ST.loadingManager.addAudioAsset("explosion", "assets/bang.mp3");
-  ST.loadingManager.addAudioAsset("sadMusic", "assets/sad.mp3");
-  ST.loadingManager.addAudioAsset("cheering", "assets/cheering.mp3");
-  ST.loadingManager.addAudioAsset("gunshot", "assets/gunshot.mp3");
-  ST.loadingManager.addAudioAsset("pain", "assets/pain.mp3");
+  // ST.loadingManager.addAudioAsset("startMusic", "assets/respirator.mp3");
+  // ST.loadingManager.addAudioAsset("gameMusic", "assets/killa.mp3");
+  // ST.loadingManager.addAudioAsset("explosion", "assets/bang.mp3");
+  // ST.loadingManager.addAudioAsset("sadMusic", "assets/sad.mp3");
+  // ST.loadingManager.addAudioAsset("cheering", "assets/cheering.mp3");
+  // ST.loadingManager.addAudioAsset("gunshot", "assets/gunshot.mp3");
+  // ST.loadingManager.addAudioAsset("pain", "assets/pain.mp3");
 };
 
 ST.onAssetsLoaded = function () {
@@ -174,9 +174,9 @@ ST.onAssetsLoaded = function () {
   ST.bgImage = ST.loadingManager.getLoadedImage("background");
   ST.pigeonImage = ST.loadingManager.getLoadedImage("pigeon");
 
-  ST.startSound = new Audio("assets/respirator.mp3");
-  ST.startSound.volume = 0.4;
-  ST.startSound.loop = true;
+  // ST.startSound = new Audio("assets/respirator.mp3");
+  // ST.startSound.volume = 0.4;
+  // ST.startSound.loop = true;
 
   ST.context.clearRect(0, 0, ST.width, ST.height);
 
@@ -497,9 +497,9 @@ ST.volumeControl = function () {
   switch (ST.keyboard.keyDown) {
     case ST.keys.SP:
       if (ST.assetsLoaded) {
-        if (ST.startSound) {
-          ST.startSound.pause();
-        }
+        // if (ST.startSound) {
+        //   ST.startSound.pause();
+        // }
 
         Game.start();
         ST.playButtonClicked = true;
@@ -531,9 +531,9 @@ ST.setupTouchControls = function () {
       e.preventDefault();
       // Only handle touch if we're still on the start screen (game not started)
       if (ST.assetsLoaded && !ST.playButtonClicked) {
-        if (ST.startSound) {
-          ST.startSound.pause();
-        }
+        // if (ST.startSound) {
+        //   ST.startSound.pause();
+        // }
         Game.start();
         ST.playButtonClicked = true;
         // Remove start screen touch handler once game starts
