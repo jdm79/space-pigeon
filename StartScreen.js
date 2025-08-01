@@ -33,9 +33,21 @@ var ST = {
   loadingManager: null,
   assetsLoaded: false,
 
-  tipsList: [
+  // Tips will be set dynamically based on device type
+  tipsList: [],
+  
+  // Desktop tips
+  desktopTips: [
     "Avoid the colourful space rectangles",
-    "Press SPACE to start - and to fly!",
+    "Press SPACE to start and to fly",
+    "Collect points by flying through gaps",
+    "Each level gets harder and faster",
+  ],
+  
+  // Mobile tips
+  mobileTips: [
+    "Avoid the colourful space rectangles", 
+    "Touch screen to start and to fly",
     "Collect points by flying through gaps",
     "Each level gets harder and faster",
   ],
@@ -153,6 +165,10 @@ ST.onAssetsLoaded = function () {
   }
 
   ST.assetsLoaded = true;
+  
+  // Set appropriate tips based on device type
+  const isMobile = 'ontouchstart' in window && window.innerWidth <= 768;
+  ST.tipsList = isMobile ? ST.mobileTips : ST.desktopTips;
 
   ST.PanelImg = ST.loadingManager.getLoadedImage("panel");
   ST.bgImage = ST.loadingManager.getLoadedImage("background");

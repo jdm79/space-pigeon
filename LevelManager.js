@@ -222,8 +222,10 @@ class LevelManager {
         canvasHeight / 2 - 20
       );
       context.fillStyle = "#00FF00"; // Green for instructions
+      const isMobile = 'ontouchstart' in window && window.innerWidth <= 768;
+      const continueText = isMobile ? "Touch screen to continue" : "Press SPACE to continue";
       context.fillText(
-        "Press SPACE to continue",
+        continueText,
         canvasWidth / 2,
         canvasHeight / 2 + 20
       );

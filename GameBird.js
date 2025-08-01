@@ -217,7 +217,7 @@ class SpacePigeonGame {
           this.startLevel();
         }
       }
-    } else if (this.gameState === "gameOver" && keyCode === this.keys.M) {
+    } else if (this.gameState === "gameOver" && keyCode === this.keys.SP) {
       this.returnToMainMenu();
     }
 
@@ -226,9 +226,11 @@ class SpacePigeonGame {
 
   handleKeyUp(keyCode) {
     if (keyCode === this.keys.SP) {
-      this.player.handleInput(keyCode, false);
-    } else if (keyCode === this.keys.M && this.gameState === "gameOver") {
-      this.returnToMainMenu();
+      if (this.gameState === "gameOver") {
+        this.returnToMainMenu();
+      } else {
+        this.player.handleInput(keyCode, false);
+      }
     }
 
     this.keyboard.keyDown = -1;
@@ -496,10 +498,12 @@ class SpacePigeonGame {
       this.previousHighScore
     );
 
-    // Instructions - bright green
+    // Instructions - bright green (different for mobile vs desktop)
     this.canvasContext.font = "16px VT323, monospace";
     this.canvasContext.fillStyle = "#00FF00";
-    this.canvasContext.fillText("Press M to return to menu", centerX, 365);
+    const isMobile = 'ontouchstart' in window && window.innerWidth <= 768;
+    const instructionText = isMobile ? "Touch screen to return to menu" : "Press SPACE to return to menu";
+    this.canvasContext.fillText(instructionText, centerX, 365);
 
     // Reset text alignment
     this.canvasContext.textAlign = "left";
