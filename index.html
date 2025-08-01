@@ -180,79 +180,82 @@
         }
       }
 
-      /* Mobile Initialization Screen */
-      #mobileInit {
+      /* Mobile Rotation Prompt Screen */
+      #rotationPrompt {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
         z-index: 10000;
         display: flex;
         align-items: center;
         justify-content: center;
         font-family: 'VT323', monospace;
         color: white;
+        overflow: hidden;
       }
 
-      #mobileInitContent {
+      #rotationContent {
         text-align: center;
-        padding: 20px;
+        padding: 40px 20px;
         max-width: 90%;
       }
 
-      #mobileTitle {
-        font-size: 48px;
+      #rotationTitle {
+        font-size: 36px;
         color: #00FFFF;
-        margin-bottom: 10px;
-        text-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF;
-        animation: glow 2s ease-in-out infinite alternate;
+        margin-bottom: 30px;
+        text-shadow: 0 0 15px #00FFFF;
+        animation: titleGlow 2s ease-in-out infinite alternate;
       }
 
-      #mobileSubtitle {
+      #rotationIcon {
+        font-size: 64px;
+        margin-bottom: 30px;
+        animation: rotateIcon 2s ease-in-out infinite;
+      }
+
+      #rotationMessage {
         font-size: 24px;
         color: #FFFF00;
-        margin-bottom: 30px;
-        text-shadow: 0 0 10px #FFFF00;
+        margin-bottom: 15px;
+        text-shadow: 0 0 8px #FFFF00;
+        line-height: 1.4;
       }
 
-      #mobileInstructions {
+      #rotationSubtext {
         font-size: 18px;
         color: #00FF00;
-        margin-bottom: 40px;
-        line-height: 1.6;
+        opacity: 0.8;
+        line-height: 1.3;
       }
 
-      #mobileInstructions div {
-        margin-bottom: 8px;
+      @keyframes titleGlow {
+        from { text-shadow: 0 0 15px #00FFFF; }
+        to { text-shadow: 0 0 25px #00FFFF, 0 0 35px #00FFFF; }
       }
 
-      #mobileTouchPrompt {
-        font-size: 20px;
-        color: #FF00FF;
-        padding: 15px 25px;
-        border: 2px solid #FF00FF;
-        border-radius: 10px;
-        background: rgba(255, 0, 255, 0.1);
-        animation: pulse 1.5s ease-in-out infinite;
-        cursor: pointer;
-        user-select: none;
+      @keyframes rotateIcon {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(15deg); }
       }
 
-      @keyframes glow {
-        from { text-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF; }
-        to { text-shadow: 0 0 30px #00FFFF, 0 0 60px #00FFFF; }
+      /* Hide rotation prompt on desktop and landscape */
+      @media (min-width: 769px), (orientation: landscape) {
+        #rotationPrompt {
+          display: none !important;
+        }
       }
 
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-      }
-
-      /* Hide mobile init on desktop */
-      @media (min-width: 769px) {
-        #mobileInit {
+      /* Show rotation prompt only on mobile portrait */
+      @media (max-width: 768px) and (orientation: portrait) {
+        #rotationPrompt {
+          display: flex !important;
+        }
+        
+        #gameArea {
           display: none !important;
         }
       }
@@ -264,17 +267,13 @@
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   </head>
   <body>
-    <!-- Mobile fullscreen initialization screen -->
-    <div id="mobileInit" style="display: none;">
-      <div id="mobileInitContent">
-        <div id="mobileTitle">SPACE PIGEON</div>
-        <div id="mobileSubtitle">Ready for Launch?</div>
-        <div id="mobileInstructions">
-          <div>• Rotate to landscape for best experience</div>
-          <div>• Touch anywhere to enter fullscreen</div>
-          <div>• Use touch controls to fly</div>
-        </div>
-        <div id="mobileTouchPrompt">👆 TAP TO START FULLSCREEN GAMING 👆</div>
+    <!-- Mobile rotation prompt screen -->
+    <div id="rotationPrompt" style="display: none;">
+      <div id="rotationContent">
+        <div id="rotationTitle">SPACE PIGEON</div>
+        <div id="rotationIcon">📱 ↻</div>
+        <div id="rotationMessage">Please rotate your device to landscape mode to play</div>
+        <div id="rotationSubtext">Turn your phone sideways for the best gaming experience</div>
       </div>
     </div>
     
@@ -285,12 +284,11 @@
     </div>
     
     <script>
-      // Mobile Gaming Initialization System
+      // Simple Mobile Rotation & Browser Bar Management
       let isMobileDevice = false;
-      let isGameInitialized = false;
-      let fullscreenActive = false;
+      let isLandscapeMode = false;
       
-      // Comprehensive mobile detection
+      // Detect mobile device
       function detectMobile() {
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -300,57 +298,22 @@
         return isTouchDevice && (isSmallScreen || isMobileUA);
       }
       
-      // Force landscape orientation
-      function forceLandscapeOrientation() {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape-primary').catch(() => {
-            screen.orientation.lock('landscape').catch(() => {});
-          });
-        } else if (screen.lockOrientation) {
-          screen.lockOrientation('landscape-primary') || screen.lockOrientation('landscape');
-        } else if (screen.webkitLockOrientation) {
-          screen.webkitLockOrientation('landscape-primary') || screen.webkitLockOrientation('landscape');
-        } else if (screen.mozLockOrientation) {
-          screen.mozLockOrientation('landscape-primary') || screen.mozLockOrientation('landscape');
-        }
+      // Check orientation
+      function checkOrientation() {
+        isLandscapeMode = window.innerWidth > window.innerHeight;
+        return isLandscapeMode;
       }
       
-      // Enter fullscreen mode
-      async function enterFullscreen() {
-        const element = document.documentElement;
+      // Hide browser bars and optimize for gaming
+      function optimizeForMobileGaming() {
+        if (!isMobileDevice) return;
         
-        try {
-          if (element.requestFullscreen) {
-            await element.requestFullscreen();
-          } else if (element.webkitRequestFullscreen) {
-            element.webkitRequestFullscreen();
-          } else if (element.mozRequestFullScreen) {
-            element.mozRequestFullScreen();
-          } else if (element.msRequestFullscreen) {
-            element.msRequestFullscreen();
-          }
-          fullscreenActive = true;
-          return true;
-        } catch (error) {
-          console.log('Fullscreen failed:', error);
-          return false;
-        }
-      }
-      
-      // Mobile viewport optimization
-      function optimizeMobileViewport() {
-        // Prevent all scrolling
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        
-        // Set custom viewport height
+        // Set viewport height accounting for browser bars
         const setViewportHeight = () => {
           const vh = window.innerHeight * 0.01;
           document.documentElement.style.setProperty('--vh', `${vh}px`);
           
+          // Update canvas size
           const canvas = document.getElementById('myCanvas');
           if (canvas) {
             canvas.style.height = `${window.innerHeight}px`;
@@ -361,6 +324,13 @@
         setViewportHeight();
         window.addEventListener('resize', setViewportHeight);
         
+        // Prevent scrolling behaviors
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        
         // Prevent iOS bounce scrolling
         document.body.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
         
@@ -369,107 +339,71 @@
           if (e.touches.length > 1) e.preventDefault();
         }, { passive: false });
         
-        // Hide address bar
+        // Hide address bar (delayed to ensure page is loaded)
         setTimeout(() => {
           window.scrollTo(0, 1);
           setTimeout(() => window.scrollTo(0, 0), 100);
+        }, 500);
+      }
+      
+      // Handle orientation changes
+      function handleOrientationChange() {
+        if (!isMobileDevice) return;
+        
+        setTimeout(() => {
+          checkOrientation();
+          
+          if (isLandscapeMode) {
+            // User rotated to landscape - optimize and show game
+            optimizeForMobileGaming();
+            document.getElementById('rotationPrompt').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'flex';
+            
+            // Start the game if it hasn't started yet
+            if (typeof ST !== 'undefined' && typeof ST.start === 'function' && !ST.assetsLoaded) {
+              setTimeout(() => ST.start(), 300);
+            }
+          } else {
+            // User rotated to portrait - show rotation prompt
+            document.getElementById('rotationPrompt').style.display = 'flex';
+            document.getElementById('gameArea').style.display = 'none';
+            
+            // Reset body styles to allow normal scrolling in portrait
+            document.body.style.position = '';
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+          }
         }, 200);
       }
       
-      // Initialize mobile gaming experience
-      async function initializeMobileGaming() {
-        // Force landscape orientation first
-        forceLandscapeOrientation();
-        
-        // Optimize viewport
-        optimizeMobileViewport();
-        
-        // Enter fullscreen
-        const fullscreenSuccess = await enterFullscreen();
-        
-        // Hide mobile init screen and show game
-        document.getElementById('mobileInit').style.display = 'none';
-        document.getElementById('gameArea').style.display = 'flex';
-        
-        // Initialize the game
-        if (typeof ST !== 'undefined' && typeof ST.start === 'function') {
-          // Delay to ensure fullscreen is active
-          setTimeout(() => {
-            ST.start();
-            isGameInitialized = true;
-          }, 500);
-        }
-        
-        return fullscreenSuccess;
-      }
-      
-      // Handle mobile initialization
-      function handleMobileInit() {
-        if (!isMobileDevice) return;
-        
-        // Block game loading on mobile
-        document.getElementById('gameArea').style.display = 'none';
-        document.getElementById('mobileInit').style.display = 'flex';
-        
-        // Set up touch handler for initialization
-        const initTouchHandler = async (e) => {
-          e.preventDefault();
-          document.removeEventListener('touchstart', initTouchHandler);
-          document.removeEventListener('click', initTouchHandler);
-          
-          await initializeMobileGaming();
-        };
-        
-        document.addEventListener('touchstart', initTouchHandler, { passive: false });
-        document.addEventListener('click', initTouchHandler, { passive: false });
-      }
-      
-      // Override ST.start to prevent auto-start on mobile
-      const originalSTStart = window.ST && window.ST.start;
-      if (window.ST) {
-        window.ST.start = function() {
-          if (isMobileDevice && !isGameInitialized) {
-            return; // Block start until mobile init is complete
-          }
-          if (originalSTStart) {
-            originalSTStart.call(this);
-          }
-        };
-      }
-      
-      // Handle fullscreen changes
-      document.addEventListener('fullscreenchange', () => {
-        fullscreenActive = !!(document.fullscreenElement || 
-                             document.webkitFullscreenElement || 
-                             document.mozFullScreenElement || 
-                             document.msFullscreenElement);
-      });
-      
-      // Handle orientation changes
-      window.addEventListener('orientationchange', () => {
-        if (isMobileDevice) {
-          setTimeout(() => {
-            optimizeMobileViewport();
-            if (!fullscreenActive) {
-              window.scrollTo(0, 1);
-              setTimeout(() => window.scrollTo(0, 0), 100);
-            }
-          }, 200);
-        }
-      });
-      
-      // Initialize when DOM is ready
-      document.addEventListener('DOMContentLoaded', () => {
+      // Initialize on page load
+      function initialize() {
         isMobileDevice = detectMobile();
         
         if (isMobileDevice) {
-          handleMobileInit();
+          checkOrientation();
+          
+          if (isLandscapeMode) {
+            // Already in landscape - start game immediately
+            optimizeForMobileGaming();
+            document.getElementById('gameArea').style.display = 'flex';
+          } else {
+            // In portrait - show rotation prompt
+            document.getElementById('rotationPrompt').style.display = 'flex';
+            document.getElementById('gameArea').style.display = 'none';
+          }
+          
+          // Listen for orientation changes
+          window.addEventListener('orientationchange', handleOrientationChange);
+          window.addEventListener('resize', handleOrientationChange);
         } else {
-          // Desktop: normal initialization
+          // Desktop - normal behavior
           document.getElementById('gameArea').style.display = 'flex';
-          // ST.start will be called normally by StartScreen.js
         }
-      });
+      }
+      
+      // Start when DOM is ready
+      document.addEventListener('DOMContentLoaded', initialize);
     </script>
   </body>
 </html>
