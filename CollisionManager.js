@@ -2,9 +2,9 @@
 
 class CollisionManager {
   constructor() {
-    this.explosionSound = new Audio();
-    this.explosionSound.src = "assets/bang.mp3";
-    this.explosionSound.volume = 0.2;
+    // this.explosionSound = new Audio();
+    // this.explosionSound.src = "assets/bang.mp3";
+    // this.explosionSound.volume = 0.2;
 
     this.explosionImage = new Image();
     this.explosionImage.src = "assets/fireball.png";
@@ -51,9 +51,9 @@ class CollisionManager {
 
   handleObstacleCollision(collisionData) {
     if (collisionData.hasObstacleCollision) {
-      if (this.explosionSound) {
-        this.explosionSound.play().catch(() => {});
-      }
+      // if (this.explosionSound) {
+      //   this.explosionSound.play().catch(() => {});
+      // }
       return true;
     }
     return false;

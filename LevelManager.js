@@ -108,9 +108,9 @@ class LevelManager {
 
   completeLevel() {
     this.levelComplete = true;
-    if (this.finishSound) {
-      this.finishSound.play().catch(() => {});
-    }
+    // if (this.finishSound) {
+    //   this.finishSound.play().catch(() => {});
+    // }
   }
 
   nextLevel() {
@@ -238,8 +238,8 @@ class LevelManager {
     if (keyCode === 32 && this.levelComplete) {
       // Space key
       // Stop the cheering music when proceeding to next level
-      this.finishSound.pause();
-      this.finishSound.currentTime = 0; // Reset to beginning for next time
+      // this.finishSound.pause();
+      // this.finishSound.currentTime = 0; // Reset to beginning for next time
 
       if (this.isLastLevel()) {
         this.resetToFirstLevel();

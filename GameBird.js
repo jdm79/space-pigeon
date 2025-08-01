@@ -167,27 +167,27 @@ class SpacePigeonGame {
   }
 
   setupAudioWithLoadedAssets(loadingManager) {
-    this.backgroundMusic = loadingManager.getLoadedAudio("gameMusic");
-    if (this.backgroundMusic) {
-      this.backgroundMusic.volume = 0.4;
-      this.backgroundMusic.loop = true;
-      this.backgroundMusic.play().catch(() => {});
-    }
+    // this.backgroundMusic = loadingManager.getLoadedAudio("gameMusic");
+    // if (this.backgroundMusic) {
+    //   this.backgroundMusic.volume = 0.4;
+    //   this.backgroundMusic.loop = true;
+    //   this.backgroundMusic.play().catch(() => {});
+    // }
 
-    this.sadMusic = new Audio("assets/sad.mp3");
-    this.sadMusic.volume = 0.6;
+    // this.sadMusic = new Audio("assets/sad.mp3");
+    // this.sadMusic.volume = 0.6;
   }
 
   setupAudio() {
-    this.backgroundMusic = new Audio();
-    this.backgroundMusic.src = "assets/killa.mp3";
-    this.backgroundMusic.volume = 0.4;
-    this.backgroundMusic.loop = true;
-    this.backgroundMusic.play().catch(() => {});
+    // this.backgroundMusic = new Audio();
+    // this.backgroundMusic.src = "assets/killa.mp3";
+    // this.backgroundMusic.volume = 0.4;
+    // this.backgroundMusic.loop = true;
+    // this.backgroundMusic.play().catch(() => {});
 
-    this.sadMusic = new Audio();
-    this.sadMusic.src = "assets/pain.mp3";
-    this.sadMusic.volume = 0.6;
+    // this.sadMusic = new Audio();
+    // this.sadMusic.src = "assets/pain.mp3";
+    // this.sadMusic.volume = 0.6;
   }
 
   setupInput() {
@@ -254,16 +254,16 @@ class SpacePigeonGame {
   }
 
   handleVolumeControl(keyCode) {
-    switch (keyCode) {
-      case this.keys.P:
-        this.backgroundMusic.pause();
-        break;
-      case this.keys.S:
-        if (this.backgroundMusic) {
-          this.backgroundMusic.play().catch(() => {});
-        }
-        break;
-    }
+    // switch (keyCode) {
+    //   case this.keys.P:
+    //     this.backgroundMusic.pause();
+    //     break;
+    //   case this.keys.S:
+    //     if (this.backgroundMusic) {
+    //       this.backgroundMusic.play().catch(() => {});
+    //     }
+    //     break;
+    // }
   }
 
   startLevel() {
@@ -280,18 +280,18 @@ class SpacePigeonGame {
     }
 
     // Make sure start screen music is completely stopped
-    if (ST.startSound) {
-      ST.startSound.pause();
-      ST.startSound.currentTime = 0;
-      ST.startSound = null; // Clear reference to prevent any issues
-    }
+    // if (ST.startSound) {
+    //   ST.startSound.pause();
+    //   ST.startSound.currentTime = 0;
+    //   ST.startSound = null; // Clear reference to prevent any issues
+    // }
     
     // Restart background music for new level
-    if (this.backgroundMusic) {
-      this.backgroundMusic.currentTime = 0; // Reset to beginning
-      this.backgroundMusic.volume = 0.4;
-      this.backgroundMusic.play().catch(() => {});
-    }
+    // if (this.backgroundMusic) {
+    //   this.backgroundMusic.currentTime = 0; // Reset to beginning
+    //   this.backgroundMusic.volume = 0.4;
+    //   this.backgroundMusic.play().catch(() => {});
+    // }
   }
 
   restartGame() {
@@ -305,14 +305,14 @@ class SpacePigeonGame {
     this.cleanupTouchControls();
     
     // Stop all game sounds immediately
-    if (this.backgroundMusic) {
-      this.backgroundMusic.pause();
-      this.backgroundMusic.currentTime = 0;
-    }
-    if (this.sadMusic) {
-      this.sadMusic.pause();
-      this.sadMusic.currentTime = 0;
-    }
+    // if (this.backgroundMusic) {
+    //   this.backgroundMusic.pause();
+    //   this.backgroundMusic.currentTime = 0;
+    // }
+    // if (this.sadMusic) {
+    //   this.sadMusic.pause();
+    //   this.sadMusic.currentTime = 0;
+    // }
 
     // Reset game state
     this.levelManager.resetToFirstLevel();
@@ -396,14 +396,14 @@ class SpacePigeonGame {
         this.gameState = "gameOver";
         
         // Stop ALL music
-        this.backgroundMusic.pause();
-        if (ST.startSound) {
-          ST.startSound.pause();
-        }
+        // this.backgroundMusic.pause();
+        // if (ST.startSound) {
+        //   ST.startSound.pause();
+        // }
         
-        if (this.sadMusic) {
-          this.sadMusic.play().catch(() => {});
-        }
+        // if (this.sadMusic) {
+        //   this.sadMusic.play().catch(() => {});
+        // }
         // Save score when game ends
         this.previousHighScore = this.scoreManager.getHighScore();
         this.isNewHighScore = this.scoreManager.saveScore();
@@ -420,7 +420,7 @@ class SpacePigeonGame {
       ) {
         this.gameState = "levelComplete";
         // Stop background music immediately when hitting finish line
-        this.backgroundMusic.pause();
+        // this.backgroundMusic.pause();
       }
 
       // Update background
