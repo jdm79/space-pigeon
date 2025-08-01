@@ -69,96 +69,29 @@
         }
       }
 
-      /* Mobile-specific styles */
-      @media (max-width: 768px) {
-        html, body {
-          padding: 0;
-          margin: 0;
-          overflow: hidden;
-          position: fixed;
-          width: 100vw;
-          height: 100vh;
-        }
-        
-        body {
-          padding: 0;
-        }
-        
-        #gameArea {
-          width: 100vw;
-          height: 100vh;
-          height: calc(var(--vh, 1vh) * 100);
-          position: fixed;
-          top: 0;
-          left: 0;
-        }
-        
-        #myCanvas {
-          width: 100vw;
-          height: 100vh;
-          height: calc(var(--vh, 1vh) * 100);
-          max-width: none;
-          max-height: none;
-          touch-action: none;
-          position: fixed;
-          top: 0;
-          left: 0;
-        }
-      }
-
-      /* Force landscape orientation on mobile - rotate so game right is at phone bottom */
+      /* Mobile portrait - normal behavior with browser bars */
       @media (max-width: 768px) and (orientation: portrait) {
-        html {
-          transform: rotate(-90deg);
-          transform-origin: center center;
-          width: 100vh;
-          height: 100vw;
-          overflow: hidden;
-          position: fixed;
-          top: 0;
-          left: 0;
-        }
-        
         body {
-          transform: rotate(-90deg);
-          transform-origin: center center;
-          width: 100vh;
-          height: 100vw;
-          position: fixed;
-          top: 0;
-          left: 0;
-          overflow: hidden;
-          padding: 0;
-        }
-        
-        #gameArea {
-          width: 100vh;
-          height: 100vw;
-          height: calc(var(--vh, 1vh) * 100);
-          position: fixed;
-          top: 0;
-          left: 0;
+          padding: 20px;
         }
         
         #myCanvas {
-          width: 100vh;
-          height: 100vw;
-          height: calc(var(--vh, 1vh) * 100);
-          position: fixed;
-          top: 0;
-          left: 0;
+          width: calc(100vw - 40px);
+          height: calc((100vw - 40px) * 0.6);
+          max-width: 400px;
+          max-height: 240px;
         }
       }
 
-      /* Landscape mobile optimization */
+      /* Mobile landscape - optimized gaming mode */
       @media (max-width: 768px) and (orientation: landscape) {
         html, body {
           padding: 0;
           margin: 0;
-          width: 100vw;
-          height: 100vh;
           overflow: hidden;
           position: fixed;
+          width: 100vw;
+          height: 100vh;
         }
         
         #gameArea {
@@ -168,17 +101,23 @@
           position: fixed;
           top: 0;
           left: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #111;
         }
         
         #myCanvas {
-          width: 100vw;
-          height: 100vh;
-          height: calc(var(--vh, 1vh) * 100);
-          position: fixed;
-          top: 0;
-          left: 0;
+          /* Maintain 5:3 aspect ratio (800:480) */
+          width: auto;
+          height: calc(100vh - 20px);
+          max-height: calc(100vw * 0.6);
+          max-width: calc(100vw - 20px);
+          touch-action: none;
+          border: 1px solid #444;
         }
       }
+
 
       /* Mobile Rotation Prompt Screen */
       #rotationPrompt {
@@ -242,20 +181,9 @@
         50% { transform: rotate(15deg); }
       }
 
-      /* Hide rotation prompt on desktop and landscape */
-      @media (min-width: 769px), (orientation: landscape) {
+      /* Hide rotation prompt on desktop */
+      @media (min-width: 769px) {
         #rotationPrompt {
-          display: none !important;
-        }
-      }
-
-      /* Show rotation prompt only on mobile portrait */
-      @media (max-width: 768px) and (orientation: portrait) {
-        #rotationPrompt {
-          display: flex !important;
-        }
-        
-        #gameArea {
           display: none !important;
         }
       }
@@ -284,126 +212,75 @@
     </div>
     
     <script>
-      // Simple Mobile Rotation & Browser Bar Management
+      // Mobile Rotation Management
       let isMobileDevice = false;
-      let isLandscapeMode = false;
       
       // Detect mobile device
       function detectMobile() {
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const isSmallScreen = window.innerWidth <= 768;
-        const isMobileUA = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-        
-        return isTouchDevice && (isSmallScreen || isMobileUA);
+        return window.innerWidth <= 768 && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
       }
       
-      // Check orientation
-      function checkOrientation() {
-        isLandscapeMode = window.innerWidth > window.innerHeight;
-        return isLandscapeMode;
+      // Check if in landscape mode
+      function isLandscape() {
+        return window.innerWidth > window.innerHeight;
       }
       
-      // Hide browser bars and optimize for gaming
-      function optimizeForMobileGaming() {
-        if (!isMobileDevice) return;
+      // Hide browser bars in landscape
+      function hideBrowserBars() {
+        // Set custom viewport height
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
         
-        // Set viewport height accounting for browser bars
-        const setViewportHeight = () => {
-          const vh = window.innerHeight * 0.01;
-          document.documentElement.style.setProperty('--vh', `${vh}px`);
-          
-          // Update canvas size
-          const canvas = document.getElementById('myCanvas');
-          if (canvas) {
-            canvas.style.height = `${window.innerHeight}px`;
-            canvas.style.width = `${window.innerWidth}px`;
-          }
-        };
-        
-        setViewportHeight();
-        window.addEventListener('resize', setViewportHeight);
-        
-        // Prevent scrolling behaviors
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        
-        // Prevent iOS bounce scrolling
-        document.body.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-        
-        // Prevent pinch zoom
-        document.addEventListener('touchstart', (e) => {
-          if (e.touches.length > 1) e.preventDefault();
-        }, { passive: false });
-        
-        // Hide address bar (delayed to ensure page is loaded)
+        // Hide address bar using scroll trick
         setTimeout(() => {
           window.scrollTo(0, 1);
           setTimeout(() => window.scrollTo(0, 0), 100);
-        }, 500);
+        }, 300);
+      }
+      
+      // Show/hide appropriate screens based on orientation
+      function updateScreens() {
+        const rotationPrompt = document.getElementById('rotationPrompt');
+        const gameArea = document.getElementById('gameArea');
+        
+        if (!isMobileDevice) {
+          // Desktop - always show game
+          rotationPrompt.style.display = 'none';
+          gameArea.style.display = 'flex';
+          return;
+        }
+        
+        if (isLandscape()) {
+          // Mobile landscape - show game, hide browser bars
+          rotationPrompt.style.display = 'none';
+          gameArea.style.display = 'flex';
+          hideBrowserBars();
+          
+          // Start game if not already started
+          if (typeof ST !== 'undefined' && typeof ST.start === 'function' && !ST.assetsLoaded) {
+            setTimeout(() => ST.start(), 200);
+          }
+        } else {
+          // Mobile portrait - show rotation prompt
+          rotationPrompt.style.display = 'flex';
+          gameArea.style.display = 'none';
+        }
       }
       
       // Handle orientation changes
       function handleOrientationChange() {
-        if (!isMobileDevice) return;
-        
-        setTimeout(() => {
-          checkOrientation();
-          
-          if (isLandscapeMode) {
-            // User rotated to landscape - optimize and show game
-            optimizeForMobileGaming();
-            document.getElementById('rotationPrompt').style.display = 'none';
-            document.getElementById('gameArea').style.display = 'flex';
-            
-            // Start the game if it hasn't started yet
-            if (typeof ST !== 'undefined' && typeof ST.start === 'function' && !ST.assetsLoaded) {
-              setTimeout(() => ST.start(), 300);
-            }
-          } else {
-            // User rotated to portrait - show rotation prompt
-            document.getElementById('rotationPrompt').style.display = 'flex';
-            document.getElementById('gameArea').style.display = 'none';
-            
-            // Reset body styles to allow normal scrolling in portrait
-            document.body.style.position = '';
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-          }
-        }, 200);
+        setTimeout(updateScreens, 200);
       }
       
-      // Initialize on page load
-      function initialize() {
+      // Initialize when page loads
+      document.addEventListener('DOMContentLoaded', function() {
         isMobileDevice = detectMobile();
+        updateScreens();
         
-        if (isMobileDevice) {
-          checkOrientation();
-          
-          if (isLandscapeMode) {
-            // Already in landscape - start game immediately
-            optimizeForMobileGaming();
-            document.getElementById('gameArea').style.display = 'flex';
-          } else {
-            // In portrait - show rotation prompt
-            document.getElementById('rotationPrompt').style.display = 'flex';
-            document.getElementById('gameArea').style.display = 'none';
-          }
-          
-          // Listen for orientation changes
-          window.addEventListener('orientationchange', handleOrientationChange);
-          window.addEventListener('resize', handleOrientationChange);
-        } else {
-          // Desktop - normal behavior
-          document.getElementById('gameArea').style.display = 'flex';
-        }
-      }
-      
-      // Start when DOM is ready
-      document.addEventListener('DOMContentLoaded', initialize);
+        // Listen for orientation changes
+        window.addEventListener('orientationchange', handleOrientationChange);
+        window.addEventListener('resize', handleOrientationChange);
+      });
     </script>
   </body>
 </html>
