@@ -179,6 +179,83 @@
           left: 0;
         }
       }
+
+      /* Mobile Initialization Screen */
+      #mobileInit {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'VT323', monospace;
+        color: white;
+      }
+
+      #mobileInitContent {
+        text-align: center;
+        padding: 20px;
+        max-width: 90%;
+      }
+
+      #mobileTitle {
+        font-size: 48px;
+        color: #00FFFF;
+        margin-bottom: 10px;
+        text-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF;
+        animation: glow 2s ease-in-out infinite alternate;
+      }
+
+      #mobileSubtitle {
+        font-size: 24px;
+        color: #FFFF00;
+        margin-bottom: 30px;
+        text-shadow: 0 0 10px #FFFF00;
+      }
+
+      #mobileInstructions {
+        font-size: 18px;
+        color: #00FF00;
+        margin-bottom: 40px;
+        line-height: 1.6;
+      }
+
+      #mobileInstructions div {
+        margin-bottom: 8px;
+      }
+
+      #mobileTouchPrompt {
+        font-size: 20px;
+        color: #FF00FF;
+        padding: 15px 25px;
+        border: 2px solid #FF00FF;
+        border-radius: 10px;
+        background: rgba(255, 0, 255, 0.1);
+        animation: pulse 1.5s ease-in-out infinite;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      @keyframes glow {
+        from { text-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF; }
+        to { text-shadow: 0 0 30px #00FFFF, 0 0 60px #00FFFF; }
+      }
+
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+
+      /* Hide mobile init on desktop */
+      @media (min-width: 769px) {
+        #mobileInit {
+          display: none !important;
+        }
+      }
     </style>
 
     <link rel="icon" type="image/png" href="assets/favicon.ico" />
@@ -187,6 +264,20 @@
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   </head>
   <body>
+    <!-- Mobile fullscreen initialization screen -->
+    <div id="mobileInit" style="display: none;">
+      <div id="mobileInitContent">
+        <div id="mobileTitle">SPACE PIGEON</div>
+        <div id="mobileSubtitle">Ready for Launch?</div>
+        <div id="mobileInstructions">
+          <div>• Rotate to landscape for best experience</div>
+          <div>• Touch anywhere to enter fullscreen</div>
+          <div>• Use touch controls to fly</div>
+        </div>
+        <div id="mobileTouchPrompt">👆 TAP TO START FULLSCREEN GAMING 👆</div>
+      </div>
+    </div>
+    
     <div id="gameArea">
       <canvas id="myCanvas" width="800" height="480">
         Your browser does not support the HTML5 canvas element.
@@ -194,150 +285,189 @@
     </div>
     
     <script>
-      // Enhanced mobile fullscreen and orientation handling
-      let fullscreenAttempted = false;
-      let isFullscreenActive = false;
+      // Mobile Gaming Initialization System
+      let isMobileDevice = false;
+      let isGameInitialized = false;
+      let fullscreenActive = false;
       
-      function enterFullscreen() {
-        if (fullscreenAttempted) return;
-        fullscreenAttempted = true;
+      // Comprehensive mobile detection
+      function detectMobile() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isSmallScreen = window.innerWidth <= 768;
+        const isMobileUA = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
         
-        const element = document.documentElement;
-        
-        if (element.requestFullscreen) {
-          element.requestFullscreen().then(() => {
-            isFullscreenActive = true;
-          }).catch(() => {});
-        } else if (element.webkitRequestFullscreen) {
-          element.webkitRequestFullscreen();
-          isFullscreenActive = true;
-        } else if (element.mozRequestFullScreen) {
-          element.mozRequestFullScreen();
-          isFullscreenActive = true;
-        } else if (element.msRequestFullscreen) {
-          element.msRequestFullscreen();
-          isFullscreenActive = true;
+        return isTouchDevice && (isSmallScreen || isMobileUA);
+      }
+      
+      // Force landscape orientation
+      function forceLandscapeOrientation() {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape-primary').catch(() => {
+            screen.orientation.lock('landscape').catch(() => {});
+          });
+        } else if (screen.lockOrientation) {
+          screen.lockOrientation('landscape-primary') || screen.lockOrientation('landscape');
+        } else if (screen.webkitLockOrientation) {
+          screen.webkitLockOrientation('landscape-primary') || screen.webkitLockOrientation('landscape');
+        } else if (screen.mozLockOrientation) {
+          screen.mozLockOrientation('landscape-primary') || screen.mozLockOrientation('landscape');
         }
       }
       
-      function handleMobileOptimizations() {
-        if (window.innerWidth <= 768) {
-          // Prevent all scrolling behaviors
-          document.body.style.overflow = 'hidden';
-          document.documentElement.style.overflow = 'hidden';
-          document.body.style.position = 'fixed';
-          document.body.style.width = '100%';
-          document.body.style.height = '100%';
-          
-          // Set viewport height accounting for mobile browser bars
-          const setViewportHeight = () => {
-            const vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-            
-            // Force canvas to use real viewport height
-            const canvas = document.getElementById('myCanvas');
-            if (canvas) {
-              canvas.style.height = `${window.innerHeight}px`;
-              canvas.style.width = `${window.innerWidth}px`;
-            }
-          };
-          
-          setViewportHeight();
-          window.addEventListener('resize', setViewportHeight);
-          
-          // Lock to landscape orientation if supported (prefer landscape-primary for correct rotation)
-          if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape-primary').catch(() => {
-              // Fallback to any landscape if primary fails
-              screen.orientation.lock('landscape').catch(() => {});
-            });
-          } else if (screen.lockOrientation) {
-            screen.lockOrientation('landscape-primary') || screen.lockOrientation('landscape');
-          } else if (screen.webkitLockOrientation) {
-            screen.webkitLockOrientation('landscape-primary') || screen.webkitLockOrientation('landscape');
-          } else if (screen.mozLockOrientation) {
-            screen.mozLockOrientation('landscape-primary') || screen.mozLockOrientation('landscape');
+      // Enter fullscreen mode
+      async function enterFullscreen() {
+        const element = document.documentElement;
+        
+        try {
+          if (element.requestFullscreen) {
+            await element.requestFullscreen();
+          } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+          } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+          } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
           }
+          fullscreenActive = true;
+          return true;
+        } catch (error) {
+          console.log('Fullscreen failed:', error);
+          return false;
+        }
+      }
+      
+      // Mobile viewport optimization
+      function optimizeMobileViewport() {
+        // Prevent all scrolling
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.height = '100%';
+        
+        // Set custom viewport height
+        const setViewportHeight = () => {
+          const vh = window.innerHeight * 0.01;
+          document.documentElement.style.setProperty('--vh', `${vh}px`);
           
-          // Hide address bar on mobile browsers
+          const canvas = document.getElementById('myCanvas');
+          if (canvas) {
+            canvas.style.height = `${window.innerHeight}px`;
+            canvas.style.width = `${window.innerWidth}px`;
+          }
+        };
+        
+        setViewportHeight();
+        window.addEventListener('resize', setViewportHeight);
+        
+        // Prevent iOS bounce scrolling
+        document.body.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+        
+        // Prevent pinch zoom
+        document.addEventListener('touchstart', (e) => {
+          if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+        
+        // Hide address bar
+        setTimeout(() => {
+          window.scrollTo(0, 1);
+          setTimeout(() => window.scrollTo(0, 0), 100);
+        }, 200);
+      }
+      
+      // Initialize mobile gaming experience
+      async function initializeMobileGaming() {
+        // Force landscape orientation first
+        forceLandscapeOrientation();
+        
+        // Optimize viewport
+        optimizeMobileViewport();
+        
+        // Enter fullscreen
+        const fullscreenSuccess = await enterFullscreen();
+        
+        // Hide mobile init screen and show game
+        document.getElementById('mobileInit').style.display = 'none';
+        document.getElementById('gameArea').style.display = 'flex';
+        
+        // Initialize the game
+        if (typeof ST !== 'undefined' && typeof ST.start === 'function') {
+          // Delay to ensure fullscreen is active
           setTimeout(() => {
-            window.scrollTo(0, 1);
-            window.scrollTo(0, 0);
+            ST.start();
+            isGameInitialized = true;
           }, 500);
         }
+        
+        return fullscreenSuccess;
+      }
+      
+      // Handle mobile initialization
+      function handleMobileInit() {
+        if (!isMobileDevice) return;
+        
+        // Block game loading on mobile
+        document.getElementById('gameArea').style.display = 'none';
+        document.getElementById('mobileInit').style.display = 'flex';
+        
+        // Set up touch handler for initialization
+        const initTouchHandler = async (e) => {
+          e.preventDefault();
+          document.removeEventListener('touchstart', initTouchHandler);
+          document.removeEventListener('click', initTouchHandler);
+          
+          await initializeMobileGaming();
+        };
+        
+        document.addEventListener('touchstart', initTouchHandler, { passive: false });
+        document.addEventListener('click', initTouchHandler, { passive: false });
+      }
+      
+      // Override ST.start to prevent auto-start on mobile
+      const originalSTStart = window.ST && window.ST.start;
+      if (window.ST) {
+        window.ST.start = function() {
+          if (isMobileDevice && !isGameInitialized) {
+            return; // Block start until mobile init is complete
+          }
+          if (originalSTStart) {
+            originalSTStart.call(this);
+          }
+        };
       }
       
       // Handle fullscreen changes
-      function handleFullscreenChange() {
-        isFullscreenActive = !!(document.fullscreenElement || 
-                               document.webkitFullscreenElement || 
-                               document.mozFullScreenElement || 
-                               document.msFullscreenElement);
-      }
-      
-      // Add fullscreen event listeners
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
-      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
-      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
-      
-      // Handle orientation changes
-      window.addEventListener('orientationchange', function() {
-        setTimeout(() => {
-          handleMobileOptimizations();
-          if (window.innerWidth <= 768 && !isFullscreenActive) {
-            // Hide address bar again after orientation change
-            window.scrollTo(0, 1);
-            setTimeout(() => window.scrollTo(0, 0), 100);
-          }
-        }, 100);
+      document.addEventListener('fullscreenchange', () => {
+        fullscreenActive = !!(document.fullscreenElement || 
+                             document.webkitFullscreenElement || 
+                             document.mozFullScreenElement || 
+                             document.msFullscreenElement);
       });
       
-      // Initial setup
-      document.addEventListener('DOMContentLoaded', function() {
-        handleMobileOptimizations();
-        
-        // Additional mobile-specific event handlers
-        if (window.innerWidth <= 768) {
-          // Prevent bounce scrolling on iOS
-          document.body.addEventListener('touchmove', function(e) {
-            e.preventDefault();
-          }, { passive: false });
-          
-          // Prevent pinch zoom
-          document.addEventListener('touchstart', function(e) {
-            if (e.touches.length > 1) {
-              e.preventDefault();
+      // Handle orientation changes
+      window.addEventListener('orientationchange', () => {
+        if (isMobileDevice) {
+          setTimeout(() => {
+            optimizeMobileViewport();
+            if (!fullscreenActive) {
+              window.scrollTo(0, 1);
+              setTimeout(() => window.scrollTo(0, 0), 100);
             }
-          }, { passive: false });
-          
-          document.addEventListener('touchmove', function(e) {
-            if (e.touches.length > 1) {
-              e.preventDefault();
-            }
-          }, { passive: false });
-          
-          // Try to enter fullscreen on first user interaction
-          const enterFullscreenOnTouch = () => {
-            if (!fullscreenAttempted) {
-              enterFullscreen();
-            }
-          };
-          
-          document.addEventListener('touchstart', enterFullscreenOnTouch, { once: true });
-          document.addEventListener('click', enterFullscreenOnTouch, { once: true });
+          }, 200);
         }
       });
       
-      // Handle visibility changes (for when user switches tabs/apps)
-      document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible' && window.innerWidth <= 768) {
-          setTimeout(() => {
-            handleMobileOptimizations();
-            // Try to hide address bar again
-            window.scrollTo(0, 1);
-            setTimeout(() => window.scrollTo(0, 0), 100);
-          }, 200);
+      // Initialize when DOM is ready
+      document.addEventListener('DOMContentLoaded', () => {
+        isMobileDevice = detectMobile();
+        
+        if (isMobileDevice) {
+          handleMobileInit();
+        } else {
+          // Desktop: normal initialization
+          document.getElementById('gameArea').style.display = 'flex';
+          // ST.start will be called normally by StartScreen.js
         }
       });
     </script>
