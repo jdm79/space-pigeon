@@ -46,19 +46,48 @@ class ScoreManager {
   drawScore(context, canvasWidth, canvasHeight) {
     context.font = "18px VT323, monospace";
 
-    // Current score - bright green
-    context.fillStyle = "#00FF00";
-    context.fillText(`Current score: ${this.currentScore}`, 10, 70);
-
-    // High score - bright yellow
-    context.fillStyle = "#FFFF00";
-    context.fillText(`High score: ${this.highScore}`, 10, 90);
-
-    // Last score - bright orange
+    // Prepare score lines
+    const lines = [
+      { text: `Current score: ${this.currentScore}`, color: "#00FF00" },
+      { text: `High score: ${this.highScore}`, color: "#FFFF00" }
+    ];
+    
+    // Add previous score if exists
     if (this.lastScore > 0) {
-      context.fillStyle = "#FF8800";
-      context.fillText(`Previous score: ${this.lastScore}`, 10, 110);
+      lines.push({ text: `Previous score: ${this.lastScore}`, color: "#FF8800" });
     }
+
+    // Calculate box dimensions
+    const padding = 10;
+    const lineHeight = 20;
+    const maxWidth = Math.max(...lines.map(line => context.measureText(line.text).width));
+    const boxWidth = maxWidth + padding * 2;
+    const boxHeight = lines.length * lineHeight + padding * 2;
+    
+    // Position at top-right with 2px margins
+    const boxX = canvasWidth - boxWidth - 2; // 2px margin from right edge
+    const boxY = 2; // 2px margin from top
+    
+    // Draw black background
+    context.fillStyle = "#000000";
+    context.fillRect(boxX, boxY, boxWidth, boxHeight);
+    
+    // Draw retro green border (matching level info style)
+    context.strokeStyle = "#00FF00"; // Bright green
+    context.lineWidth = 2;
+    context.strokeRect(boxX, boxY, boxWidth, boxHeight);
+    
+    // Draw inner border for extra retro effect
+    context.strokeStyle = "#00AA00"; // Darker green
+    context.lineWidth = 1;
+    context.strokeRect(boxX + 2, boxY + 2, boxWidth - 4, boxHeight - 4);
+    
+    // Draw score lines
+    lines.forEach((line, index) => {
+      context.fillStyle = line.color;
+      const textY = boxY + padding + (index + 1) * lineHeight - 3; // -3 for better vertical alignment
+      context.fillText(line.text, boxX + padding, textY);
+    });
   }
 
   drawGameOverScore(context, isNewHighScore, previousHighScore) {

@@ -151,9 +151,39 @@ class LevelManager {
   drawLevelInfo(context, canvasWidth) {
     const level = this.getCurrentLevel();
 
+    // Set up font for measuring text
     context.font = "18px VT323, monospace";
+    const text = level.name;
+    const textWidth = context.measureText(text).width;
+    
+    // CENTER-TOP: Level name centered at top with 2px margin from top
+    const textX = canvasWidth / 2 - textWidth / 2; // Centered horizontally
+    const textY = 2 + 12 + 18; // 2px margin from top + padding + font size
+    
+    // Calculate background rectangle dimensions with padding (centered)
+    const padding = 12;
+    const bgX = canvasWidth / 2 - (textWidth + padding * 2) / 2; // Centered horizontally
+    const bgY = 2; // 2px margin from top
+    const bgWidth = textWidth + padding * 2;
+    const bgHeight = 22 + padding * 2; // Font height plus padding
+    
+    // Draw black background
+    context.fillStyle = "#000000";
+    context.fillRect(bgX, bgY, bgWidth, bgHeight);
+    
+    // Draw retro green border (classic arcade style)
+    context.strokeStyle = "#00FF00"; // Bright green
+    context.lineWidth = 2;
+    context.strokeRect(bgX, bgY, bgWidth, bgHeight);
+    
+    // Draw inner border for extra retro effect
+    context.strokeStyle = "#00AA00"; // Darker green
+    context.lineWidth = 1;
+    context.strokeRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4);
+    
+    // Draw the level text in bright orange (now centered)
     context.fillStyle = "#FF8800"; // Bright orange
-    context.fillText(`${level.name}`, 10, 25);
+    context.fillText(text, textX, textY);
   }
 
   drawProgressBar(context, distanceTraveled, canvasWidth, canvasHeight) {
@@ -163,8 +193,9 @@ class LevelManager {
       : this.getLevelProgress(distanceTraveled);
     const barWidth = 150;
     const barHeight = 12;
-    const x = canvasWidth - barWidth - 80; // Move further left to show percentage
-    const y = 20;
+    const x = canvasWidth / 2 - barWidth / 2; // Centered horizontally below level name
+    const levelInfoHeight = 22 + 12 * 2; // Level info box height
+    const y = 2 + levelInfoHeight + 2; // Directly below level name with 2px gap
 
     // Background
     context.fillStyle = "rgba(0, 0, 0, 0.7)";
@@ -179,10 +210,12 @@ class LevelManager {
     context.lineWidth = 1;
     context.strokeRect(x, y, barWidth, barHeight);
 
-    // Percentage text - bright green
+    // Percentage text - bright green, centered below progress bar
     context.font = "14px VT323, monospace";
     context.fillStyle = "#00FF00";
-    context.fillText(`${progress}%`, x + barWidth + 5, y + 9);
+    const percentText = `${progress}%`;
+    const textWidth = context.measureText(percentText).width;
+    context.fillText(percentText, x + barWidth / 2 - textWidth / 2, y + barHeight + 16);
   }
 
   drawLevelComplete(context, canvasWidth, canvasHeight) {
