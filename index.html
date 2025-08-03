@@ -81,7 +81,7 @@
         }
       }
 
-      /* Mobile landscape - JavaScript handles canvas sizing */
+      /* Mobile landscape - simple CSS sizing */
       @media (max-width: 768px) and (orientation: landscape) {
         html, body {
           padding: 0;
@@ -102,10 +102,13 @@
           align-items: center;
           justify-content: center;
           background: #111;
+          padding-bottom: 80px; /* Create space at bottom */
         }
         
         #myCanvas {
-          /* Canvas dimensions set dynamically by JavaScript */
+          width: 90vw; /* 90% of screen width */
+          height: 54vw; /* Maintain 5:3 ratio (90vw * 0.6) */
+          max-height: calc(100vh - 80px); /* Don't exceed available height */
           touch-action: none;
           border: none;
         }
@@ -223,48 +226,18 @@
       function updateScreens() {
         const rotationPrompt = document.getElementById('rotationPrompt');
         const gameArea = document.getElementById('gameArea');
-        const canvas = document.getElementById('myCanvas');
         
         if (!isMobileDevice) {
-          // Desktop - always show game with default canvas size
+          // Desktop - always show game
           rotationPrompt.style.display = 'none';
           gameArea.style.display = 'flex';
-          // Keep original canvas dimensions for desktop
-          canvas.width = 800;
-          canvas.height = 480;
           return;
         }
         
         if (isLandscape()) {
-          // Mobile landscape - show game with adjusted canvas dimensions
+          // Mobile landscape - show game
           rotationPrompt.style.display = 'none';
           gameArea.style.display = 'flex';
-          
-          // DYNAMIC CANVAS SIZING FOR MOBILE LANDSCAPE
-          // Calculate available height (viewport minus padding for bottom visibility)
-          const availableHeight = window.innerHeight - 100; // 100px bottom padding
-          const availableWidth = window.innerWidth;
-          
-          // Maintain 5:3 aspect ratio (800:480)
-          const aspectRatio = 800 / 480; // 1.667
-          
-          let canvasWidth, canvasHeight;
-          
-          // Size based on height constraint (most common case for landscape)
-          canvasHeight = availableHeight;
-          canvasWidth = canvasHeight * aspectRatio;
-          
-          // If width exceeds screen, size based on width constraint
-          if (canvasWidth > availableWidth) {
-            canvasWidth = availableWidth;
-            canvasHeight = canvasWidth / aspectRatio;
-          }
-          
-          // Set canvas internal dimensions (this is what the game logic uses)
-          canvas.width = Math.floor(canvasWidth);
-          canvas.height = Math.floor(canvasHeight);
-          
-          console.log(`Mobile landscape canvas: ${canvas.width}x${canvas.height}, available space: ${availableWidth}x${availableHeight}`);
           
           // Start game if not already started
           if (typeof ST !== 'undefined' && typeof ST.start === 'function' && !ST.assetsLoaded) {
@@ -274,9 +247,6 @@
           // Mobile portrait - show rotation prompt
           rotationPrompt.style.display = 'flex';
           gameArea.style.display = 'none';
-          // Reset to default canvas size for portrait
-          canvas.width = 800;
-          canvas.height = 480;
         }
       }
       
