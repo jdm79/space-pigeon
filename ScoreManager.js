@@ -89,7 +89,7 @@ class ScoreManager {
       context.fillStyle = "#FF8800"; // Orange for encouragement
       const difference = this.highScore - this.currentScore + 1;
       context.fillText(
-        `You need ${difference} more to beat highest score`,
+        `You needed ${difference} more to beat highest score`,
         centerX,
         340
       );
