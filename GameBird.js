@@ -5,7 +5,7 @@ class SpacePigeonGame {
     this.canvas = undefined;
     this.canvasContext = undefined;
     this.gameState = "playing"; // 'playing', 'gameOver', 'levelComplete'
-    
+
     // Cache canvas dimensions to ensure consistency
     this.canvasWidth = 800;
     this.canvasHeight = 480;
@@ -78,7 +78,7 @@ class SpacePigeonGame {
   init() {
     this.canvas = document.getElementById("myCanvas");
     this.canvasContext = this.canvas.getContext("2d");
-    
+
     // Ensure canvas dimensions are properly set
     this.canvasWidth = this.canvas.width;
     this.canvasHeight = this.canvas.height;
@@ -119,7 +119,7 @@ class SpacePigeonGame {
     console.log("Canvas found:", !!this.canvas);
     this.canvasContext = this.canvas.getContext("2d");
     console.log("Canvas context:", !!this.canvasContext);
-    
+
     // Ensure canvas dimensions are properly set
     this.canvasWidth = this.canvas.width;
     this.canvasHeight = this.canvas.height;
@@ -173,7 +173,6 @@ class SpacePigeonGame {
     //   this.backgroundMusic.loop = true;
     //   this.backgroundMusic.play().catch(() => {});
     // }
-
     // this.sadMusic = new Audio("assets/sad.mp3");
     // this.sadMusic.volume = 0.6;
   }
@@ -184,7 +183,6 @@ class SpacePigeonGame {
     // this.backgroundMusic.volume = 0.4;
     // this.backgroundMusic.loop = true;
     // this.backgroundMusic.play().catch(() => {});
-
     // this.sadMusic = new Audio();
     // this.sadMusic.src = "assets/pain.mp3";
     // this.sadMusic.volume = 0.6;
@@ -285,7 +283,7 @@ class SpacePigeonGame {
     //   ST.startSound.currentTime = 0;
     //   ST.startSound = null; // Clear reference to prevent any issues
     // }
-    
+
     // Restart background music for new level
     // if (this.backgroundMusic) {
     //   this.backgroundMusic.currentTime = 0; // Reset to beginning
@@ -303,7 +301,7 @@ class SpacePigeonGame {
   returnToMainMenu() {
     // Clean up game touch controls
     this.cleanupTouchControls();
-    
+
     // Stop all game sounds immediately
     // if (this.backgroundMusic) {
     //   this.backgroundMusic.pause();
@@ -394,13 +392,13 @@ class SpacePigeonGame {
       // Handle obstacle collisions (game over)
       if (this.collisionManager.handleObstacleCollision(collisionData)) {
         this.gameState = "gameOver";
-        
+
         // Stop ALL music
         // this.backgroundMusic.pause();
         // if (ST.startSound) {
         //   ST.startSound.pause();
         // }
-        
+
         // if (this.sadMusic) {
         //   this.sadMusic.play().catch(() => {});
         // }
@@ -435,30 +433,35 @@ class SpacePigeonGame {
 
     // Find the finish line obstacle in the current obstacles
     const obstacles = this.obstacleManager.getObstacles();
-    const finishLine = obstacles.find(obstacle => obstacle.type === "finish");
-    
+    const finishLine = obstacles.find((obstacle) => obstacle.type === "finish");
+
     if (!finishLine) {
       return; // No finish line found yet
     }
-    
+
     // Get pigeon's current position and dimensions
     const playerBounds = this.player.getBounds();
     const pigeonLeftEdge = playerBounds.x;
-    
+
     // CORRECTED LOGIC: Since obstacles scroll left and pigeon stays fixed,
     // we need to check if the finish line has scrolled far enough left
     // that the pigeon's LEFT edge is past the finish line's RIGHT edge
     const finishLineRightEdge = finishLine.x + finishLine.width;
-    
+
     // DEBUG: Log positions every few frames to see what's happening
-    if (Math.random() < 0.01) { // Log roughly every 100 frames
-      console.log(`DEBUG: Pigeon left edge=${pigeonLeftEdge}, finish line right edge=${finishLineRightEdge}, finish line at X=${finishLine.x}`);
+    if (Math.random() < 0.01) {
+      // Log roughly every 100 frames
+      console.log(
+        `DEBUG: Pigeon left edge=${pigeonLeftEdge}, finish line right edge=${finishLineRightEdge}, finish line at X=${finishLine.x}`
+      );
     }
-    
+
     // LEVEL COMPLETION LOGIC: Level completes when pigeon has completely passed the finish line
     // This happens when the finish line's RIGHT edge has scrolled past the pigeon's LEFT edge
     if (finishLineRightEdge < pigeonLeftEdge) {
-      console.log(`LEVEL COMPLETE! Finish line right edge (${finishLineRightEdge}) scrolled past pigeon left edge (${pigeonLeftEdge})`);
+      console.log(
+        `LEVEL COMPLETE! Finish line right edge (${finishLineRightEdge}) scrolled past pigeon left edge (${pigeonLeftEdge})`
+      );
       this.levelManager.completeLevel();
       this.gameState = "levelComplete";
       // Stop background music immediately when completing level
@@ -532,8 +535,10 @@ class SpacePigeonGame {
     // Instructions - bright green (different for mobile vs desktop)
     this.canvasContext.font = "16px VT323, monospace";
     this.canvasContext.fillStyle = "#00FF00";
-    const isMobile = 'ontouchstart' in window && window.innerWidth <= 768;
-    const instructionText = isMobile ? "Touch screen to return to menu" : "Press SPACE to return to menu";
+    const isMobile = "ontouchstart" in window && window.innerWidth <= 768;
+    const instructionText = isMobile
+      ? "Touch screen/press SPACE to return to menu"
+      : "Press SPACE to return to menu";
     this.canvasContext.fillText(instructionText, centerX, 365);
 
     // Reset text alignment
@@ -566,49 +571,52 @@ const Game = {
   },
 };
 
-
 // Add mobile touch controls method to the class
-SpacePigeonGame.prototype.setupGameTouchControls = function() {
-  if ('ontouchstart' in window && this.canvas) {
+SpacePigeonGame.prototype.setupGameTouchControls = function () {
+  if ("ontouchstart" in window && this.canvas) {
     // Store reference for cleanup
     this.gameTouchStartHandler = (e) => {
       e.preventDefault();
       e.stopPropagation(); // Prevent bubbling to other handlers
-      
-      if (this.gameState === 'playing') {
+
+      if (this.gameState === "playing") {
         this.player.handleInput(32, true); // Simulate spacebar press
-      } else if (this.gameState === 'gameOver') {
+      } else if (this.gameState === "gameOver") {
         this.returnToMainMenu(); // Same as M key
-      } else if (this.gameState === 'levelComplete') {
+      } else if (this.gameState === "levelComplete") {
         const result = this.levelManager.handleLevelCompleteInput(32); // Simulate spacebar
         if (result) {
-          if (result.action === 'restart') {
+          if (result.action === "restart") {
             this.restartGame();
-          } else if (result.action === 'nextLevel') {
+          } else if (result.action === "nextLevel") {
             this.startLevel();
           }
         }
       }
     };
-    
+
     this.gameTouchEndHandler = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (this.gameState === 'playing') {
+      if (this.gameState === "playing") {
         this.player.handleInput(32, false); // Simulate spacebar release
       }
     };
-    
+
     // Add the game touch handlers
-    this.canvas.addEventListener('touchstart', this.gameTouchStartHandler, { passive: false });
-    this.canvas.addEventListener('touchend', this.gameTouchEndHandler, { passive: false });
+    this.canvas.addEventListener("touchstart", this.gameTouchStartHandler, {
+      passive: false,
+    });
+    this.canvas.addEventListener("touchend", this.gameTouchEndHandler, {
+      passive: false,
+    });
   }
 };
 
 // Clean up touch controls when returning to menu
-SpacePigeonGame.prototype.cleanupTouchControls = function() {
+SpacePigeonGame.prototype.cleanupTouchControls = function () {
   if (this.canvas && this.gameTouchStartHandler) {
-    this.canvas.removeEventListener('touchstart', this.gameTouchStartHandler);
-    this.canvas.removeEventListener('touchend', this.gameTouchEndHandler);
+    this.canvas.removeEventListener("touchstart", this.gameTouchStartHandler);
+    this.canvas.removeEventListener("touchend", this.gameTouchEndHandler);
   }
 };
