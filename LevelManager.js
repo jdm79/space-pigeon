@@ -54,10 +54,13 @@ class LevelManager {
       "Space Gauntlet",
       "Pigeon Nightmare",
       "Stellar Challenge",
-      "Asteroid Field",
-      "Cosmic Storm",
-      "Nebula Run",
+      "Murderous Space",
+      "Time to Die",
       "Black Hole Escape",
+      "Asteroid Field",
+      "Nebula Run",
+      "Cosmic Storm",
+
       "Meteor Shower",
       "Solar Flare",
       "Galactic Drift",
@@ -71,7 +74,6 @@ class LevelManager {
       "Asteroid Rush",
       "Galactic Conquest",
       "Pigeon Power",
-      "Murderous Space",
       "Cosmic Clash",
     ];
 
@@ -222,13 +224,11 @@ class LevelManager {
         canvasHeight / 2 - 20
       );
       context.fillStyle = "#00FF00"; // Green for instructions
-      const isMobile = 'ontouchstart' in window && window.innerWidth <= 768;
-      const continueText = isMobile ? "Touch screen to continue" : "Press SPACE to continue";
-      context.fillText(
-        continueText,
-        canvasWidth / 2,
-        canvasHeight / 2 + 20
-      );
+      const isMobile = "ontouchstart" in window && window.innerWidth <= 768;
+      const continueText = isMobile
+        ? "Touch screen to continue"
+        : "Press SPACE to continue";
+      context.fillText(continueText, canvasWidth / 2, canvasHeight / 2 + 20);
     }
 
     context.textAlign = "left";

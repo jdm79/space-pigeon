@@ -35,21 +35,21 @@ var ST = {
 
   // Tips will be set dynamically based on device type
   tipsList: [],
-  
+
   // Desktop tips
   desktopTips: [
-    "Avoid the colourful space rectangles",
-    "Press SPACE to start and to fly",
+    "Avoid the colourful space rectangles of death",
+    "Tap screen/press SPACE to start and to fly",
     "Collect points by flying through gaps",
-    "Each level gets harder and faster",
+    "Each level gets harder AND faster",
   ],
-  
+
   // Mobile tips
   mobileTips: [
-    "Avoid the colourful space rectangles", 
+    "Avoid the colourful space rectangles of death",
     "Touch screen to start and to fly",
     "Collect points by flying through gaps",
-    "Each level gets harder and faster",
+    "Each level gets harder AND faster",
   ],
   currentTipIndex: 0,
   tipStartTime: Date.now(),
@@ -165,9 +165,9 @@ ST.onAssetsLoaded = function () {
   }
 
   ST.assetsLoaded = true;
-  
+
   // Set appropriate tips based on device type
-  const isMobile = 'ontouchstart' in window && window.innerWidth <= 768;
+  const isMobile = "ontouchstart" in window && window.innerWidth <= 768;
   ST.tipsList = isMobile ? ST.mobileTips : ST.desktopTips;
 
   ST.PanelImg = ST.loadingManager.getLoadedImage("panel");
@@ -216,10 +216,10 @@ ST.draw = function () {
   // Draw background twice for seamless scrolling
   ST.context.drawImage(ST.bgImage, 0, ST.backgroundY);
   ST.context.drawImage(ST.bgImage, 0, ST.backgroundY + ST.height);
-  
+
   // Draw animated title
   ST.drawAnimatedTitle();
-  
+
   ST.context.drawImage(ST.pigeonImage, 260, 100);
 
   ST.drawTips();
@@ -296,19 +296,19 @@ ST.updateTips = function () {
 ST.drawAnimatedTitle = function () {
   const currentTime = Date.now();
   const title = "SPACE PIGEON";
-  
+
   // Set up title font - larger than tips
   ST.context.font = "48px VT323, monospace";
   ST.context.textAlign = "center";
-  
+
   // Position for title
   const titleX = ST.width / 2;
   const titleY = 65;
-  
+
   // Create pulsing glow effect (same as tips)
   const pulsePhase = (currentTime % 2000) / 2000; // 2 second cycle
   const pulseAlpha = 0.3 + 0.7 * Math.sin(pulsePhase * Math.PI * 2);
-  
+
   // Measure title for background
   const titleWidth = ST.context.measureText(title).width;
   const padding = 30;
@@ -316,39 +316,44 @@ ST.drawAnimatedTitle = function () {
   const bgY = titleY - 35;
   const bgWidth = titleWidth + padding * 2;
   const bgHeight = 50;
-  
+
   // Draw outer glow (CRT effect)
   ST.context.shadowBlur = 20;
   ST.context.shadowColor = "#00FFFF"; // Cyan glow
-  
+
   // Draw main background with gradient
-  const gradient = ST.context.createLinearGradient(bgX, bgY, bgX, bgY + bgHeight);
+  const gradient = ST.context.createLinearGradient(
+    bgX,
+    bgY,
+    bgX,
+    bgY + bgHeight
+  );
   gradient.addColorStop(0, "#001122"); // Dark blue top
   gradient.addColorStop(0.5, "#000000"); // Black middle
   gradient.addColorStop(1, "#001122"); // Dark blue bottom
-  
+
   ST.context.fillStyle = gradient;
   ST.context.fillRect(bgX, bgY, bgWidth, bgHeight);
-  
+
   // Draw neon border (pulsing cyan)
   ST.context.strokeStyle = `rgba(0, 255, 255, ${pulseAlpha})`;
   ST.context.lineWidth = 3;
   ST.context.strokeRect(bgX, bgY, bgWidth, bgHeight);
-  
+
   // Draw inner border (yellow)
   ST.context.strokeStyle = "#FFFF00";
   ST.context.lineWidth = 1;
   ST.context.strokeRect(bgX + 3, bgY + 3, bgWidth - 6, bgHeight - 6);
-  
+
   // Clear shadow for text
   ST.context.shadowBlur = 0;
-  
+
   // Add scanline effect
   for (let i = 0; i < bgHeight; i += 4) {
     ST.context.fillStyle = `rgba(0, 255, 255, ${0.15 * pulseAlpha})`;
     ST.context.fillRect(bgX, bgY + i, bgWidth, 1);
   }
-  
+
   // Draw corner decorations
   ST.context.fillStyle = "#00FFFF";
   const cornerSize = 12;
@@ -362,46 +367,66 @@ ST.drawAnimatedTitle = function () {
   ST.context.fillRect(bgX - 3, bgY + bgHeight, cornerSize, 3);
   ST.context.fillRect(bgX - 3, bgY + bgHeight - cornerSize + 3, 3, cornerSize);
   // Bottom-right
-  ST.context.fillRect(bgX + bgWidth - cornerSize + 3, bgY + bgHeight, cornerSize, 3);
-  ST.context.fillRect(bgX + bgWidth, bgY + bgHeight - cornerSize + 3, 3, cornerSize);
-  
+  ST.context.fillRect(
+    bgX + bgWidth - cornerSize + 3,
+    bgY + bgHeight,
+    cornerSize,
+    3
+  );
+  ST.context.fillRect(
+    bgX + bgWidth,
+    bgY + bgHeight - cornerSize + 3,
+    3,
+    cornerSize
+  );
+
   // Draw each letter with different colors
-  const letters = title.split('');
+  const letters = title.split("");
   const letterColors = [
-    "#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FF8800", // SPACE 
-    "#FF0000", "#00FF00", "#FFFF00", "#FF00FF", "#00FFFF", "#FF8800"  // PIGEON
+    "#FF0000",
+    "#FFFF00",
+    "#00FF00",
+    "#00FFFF",
+    "#FF00FF",
+    "#FF8800", // SPACE
+    "#FF0000",
+    "#00FF00",
+    "#FFFF00",
+    "#FF00FF",
+    "#00FFFF",
+    "#FF8800", // PIGEON
   ];
-  
+
   // Calculate letter positions
   let letterX = bgX + padding;
-  
+
   for (let i = 0; i < letters.length; i++) {
     const letter = letters[i];
-    
+
     // Skip space, but still move position
-    if (letter === ' ') {
-      letterX += ST.context.measureText(' ').width;
+    if (letter === " ") {
+      letterX += ST.context.measureText(" ").width;
       continue;
     }
-    
+
     // Color cycling for each letter (offset by letter index for wave effect)
     const colorCycle = Math.floor(((currentTime + i * 500) % 4000) / 1000); // Each letter offset by 500ms
     const cycleColors = ["#FFFF00", "#00FF00", "#FF8800", "#FF00FF"];
     const baseColor = letterColors[i];
     const currentColor = cycleColors[colorCycle];
-    
+
     // Draw red shadow for each letter
     ST.context.fillStyle = "#FF0000";
     ST.context.fillText(letter, letterX + 3, titleY + 3);
-    
+
     // Draw main letter
     ST.context.fillStyle = currentColor;
     ST.context.fillText(letter, letterX, titleY);
-    
+
     // Move to next letter position
     letterX += ST.context.measureText(letter).width;
   }
-  
+
   ST.context.textAlign = "left";
 };
 
@@ -427,52 +452,57 @@ ST.drawTips = function () {
     // Create pulsing glow effect
     const pulsePhase = (currentTime % 2000) / 2000; // 2 second cycle
     const pulseAlpha = 0.3 + 0.7 * Math.sin(pulsePhase * Math.PI * 2);
-    
+
     // Draw outer glow (multiple layers for retro CRT effect)
     ST.context.shadowBlur = 15;
     ST.context.shadowColor = "#00FFFF"; // Cyan glow
-    
+
     // Draw main background with gradient
-    const gradient = ST.context.createLinearGradient(bgX, bgY, bgX, bgY + bgHeight);
+    const gradient = ST.context.createLinearGradient(
+      bgX,
+      bgY,
+      bgX,
+      bgY + bgHeight
+    );
     gradient.addColorStop(0, "#001122"); // Dark blue top
     gradient.addColorStop(0.5, "#000000"); // Black middle
     gradient.addColorStop(1, "#001122"); // Dark blue bottom
-    
+
     ST.context.fillStyle = gradient;
     ST.context.fillRect(bgX, bgY, bgWidth, bgHeight);
-    
+
     // Draw neon border (classic arcade style)
     ST.context.strokeStyle = `rgba(0, 255, 255, ${pulseAlpha})`; // Pulsing cyan
     ST.context.lineWidth = 2;
     ST.context.strokeRect(bgX, bgY, bgWidth, bgHeight);
-    
+
     // Draw inner border
     ST.context.strokeStyle = "#FFFF00"; // Yellow inner border
     ST.context.lineWidth = 1;
     ST.context.strokeRect(bgX + 2, bgY + 2, bgWidth - 4, bgHeight - 4);
-    
+
     // Clear shadow for text
     ST.context.shadowBlur = 0;
-    
+
     // Draw text with multiple color layers for depth (classic arcade text effect)
     const textY = ST.height - 87;
-    
+
     // Shadow layer (offset)
     ST.context.fillStyle = "#FF0000"; // Red shadow
     ST.context.fillText(tip, ST.width / 2 + 2, textY + 2);
-    
+
     // Main text layer with cycling colors
     const colorCycle = Math.floor((currentTime % 4000) / 1000); // 4 colors, 1 second each
     const arcadeColors = ["#FFFF00", "#00FF00", "#FF8800", "#FF00FF"]; // Yellow, Green, Orange, Magenta
     ST.context.fillStyle = arcadeColors[colorCycle];
     ST.context.fillText(tip, ST.width / 2, textY);
-    
+
     // Add scanline effect across the tips area
     for (let i = 0; i < bgHeight; i += 4) {
       ST.context.fillStyle = `rgba(0, 255, 255, ${0.1 * pulseAlpha})`;
       ST.context.fillRect(bgX, bgY + i, bgWidth, 1);
     }
-    
+
     // Draw corner decorations (classic arcade style)
     ST.context.fillStyle = "#00FFFF";
     const cornerSize = 8;
@@ -484,10 +514,25 @@ ST.drawTips = function () {
     ST.context.fillRect(bgX + bgWidth, bgY - 2, 2, cornerSize);
     // Bottom-left corner
     ST.context.fillRect(bgX - 2, bgY + bgHeight, cornerSize, 2);
-    ST.context.fillRect(bgX - 2, bgY + bgHeight - cornerSize + 2, 2, cornerSize);
+    ST.context.fillRect(
+      bgX - 2,
+      bgY + bgHeight - cornerSize + 2,
+      2,
+      cornerSize
+    );
     // Bottom-right corner
-    ST.context.fillRect(bgX + bgWidth - cornerSize + 2, bgY + bgHeight, cornerSize, 2);
-    ST.context.fillRect(bgX + bgWidth, bgY + bgHeight - cornerSize + 2, 2, cornerSize);
+    ST.context.fillRect(
+      bgX + bgWidth - cornerSize + 2,
+      bgY + bgHeight,
+      cornerSize,
+      2
+    );
+    ST.context.fillRect(
+      bgX + bgWidth,
+      bgY + bgHeight - cornerSize + 2,
+      2,
+      cornerSize
+    );
 
     ST.context.textAlign = "left";
   }
@@ -508,26 +553,39 @@ ST.volumeControl = function () {
   }
 };
 
-
 // Mobile touch controls
 ST.setupTouchControls = function () {
   if ("ontouchstart" in window) {
     // Prevent default touch behaviors only for the document
-    document.addEventListener("touchstart", function(e) {
-      // Only prevent default for body/document level, not canvas
-      if (e.target === document.body || e.target === document.documentElement) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-    
-    document.addEventListener("touchmove", function(e) {
-      if (e.target === document.body || e.target === document.documentElement) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-    
+    document.addEventListener(
+      "touchstart",
+      function (e) {
+        // Only prevent default for body/document level, not canvas
+        if (
+          e.target === document.body ||
+          e.target === document.documentElement
+        ) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
+    document.addEventListener(
+      "touchmove",
+      function (e) {
+        if (
+          e.target === document.body ||
+          e.target === document.documentElement
+        ) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+
     // Handle touch for starting game ONLY when on start screen
-    ST.startScreenTouchHandler = function(e) {
+    ST.startScreenTouchHandler = function (e) {
       e.preventDefault();
       // Only handle touch if we're still on the start screen (game not started)
       if (ST.assetsLoaded && !ST.playButtonClicked) {
@@ -540,12 +598,14 @@ ST.setupTouchControls = function () {
         ST.canvas.removeEventListener("touchstart", ST.startScreenTouchHandler);
       }
     };
-    
-    ST.canvas.addEventListener("touchstart", ST.startScreenTouchHandler, { passive: false });
+
+    ST.canvas.addEventListener("touchstart", ST.startScreenTouchHandler, {
+      passive: false,
+    });
   }
 };
 
 // Initialize touch controls when DOM is ready
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   setTimeout(ST.setupTouchControls, 100);
 });

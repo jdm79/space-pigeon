@@ -22,7 +22,6 @@ class CollisionManager {
   checkPlayerObstacleCollisions(player, obstacles) {
     const playerBounds = player.getBounds();
     const obstacleCollisions = [];
-    const finishLineCollisions = [];
 
     for (let obstacle of obstacles) {
       const obstacleBounds = {
@@ -32,10 +31,12 @@ class CollisionManager {
         height: obstacle.height,
       };
 
-      if (this.checkCollision(playerBounds, obstacleBounds)) {
-        if (obstacle.type === "finish") {
-          finishLineCollisions.push(obstacle);
-        } else {
+      // FINISH LINE REMOVED FROM COLLISION DETECTION
+      // Finish lines are now purely decorative and don't trigger collisions
+      // Level completion is handled separately based on pigeon position vs finish line position
+      if (obstacle.type !== "finish") {
+        // Only check collisions for regular obstacles, not finish lines
+        if (this.checkCollision(playerBounds, obstacleBounds)) {
           obstacleCollisions.push(obstacle);
         }
       }
@@ -43,9 +44,7 @@ class CollisionManager {
 
     return {
       obstacleCollisions,
-      finishLineCollisions,
       hasObstacleCollision: obstacleCollisions.length > 0,
-      hasFinishLineCollision: finishLineCollisions.length > 0,
     };
   }
 
@@ -59,16 +58,9 @@ class CollisionManager {
     return false;
   }
 
-  handleFinishLineCollision(collisionData, levelManager, playerX) {
-    if (
-      collisionData.hasFinishLineCollision &&
-      !levelManager.isLevelComplete()
-    ) {
-      levelManager.completeLevel();
-      return true;
-    }
-    return false;
-  }
+  // FINISH LINE COLLISION DETECTION REMOVED
+  // Level completion now handled directly in game loop based on player position
+  // This method is no longer used
 
   drawExplosion(context, player) {
     const playerBounds = player.getBounds();
