@@ -410,18 +410,9 @@ class SpacePigeonGame {
         return;
       }
 
-      // Handle finish line collisions (level complete)
-      if (
-        this.collisionManager.handleFinishLineCollision(
-          collisionData,
-          this.levelManager,
-          this.distanceTraveled
-        )
-      ) {
-        this.gameState = "levelComplete";
-        // Stop background music immediately when hitting finish line
-        // this.backgroundMusic.pause();
-      }
+      // FINISH LINE DETECTION: Check if pigeon has completely passed the finish line
+      // This replaces collision-based detection with position-based detection
+      this.checkFinishLineCompletion();
 
       // Update background
       this.updateBackground();
@@ -432,6 +423,46 @@ class SpacePigeonGame {
     this.backgroundSpritePosition.x--;
     if (this.backgroundSpritePosition.x <= -800) {
       this.backgroundSpritePosition.x = 0;
+    }
+  }
+
+  // NEW FINISH LINE DETECTION METHOD
+  // Checks if pigeon has completely passed through the finish line based on positions
+  checkFinishLineCompletion() {
+    if (this.levelManager.isLevelComplete()) {
+      return; // Already completed, don't check again
+    }
+
+    // Find the finish line obstacle in the current obstacles
+    const obstacles = this.obstacleManager.getObstacles();
+    const finishLine = obstacles.find(obstacle => obstacle.type === "finish");
+    
+    if (!finishLine) {
+      return; // No finish line found yet
+    }
+    
+    // Get pigeon's current position and dimensions
+    const playerBounds = this.player.getBounds();
+    const pigeonLeftEdge = playerBounds.x;
+    
+    // CORRECTED LOGIC: Since obstacles scroll left and pigeon stays fixed,
+    // we need to check if the finish line has scrolled far enough left
+    // that the pigeon's LEFT edge is past the finish line's RIGHT edge
+    const finishLineRightEdge = finishLine.x + finishLine.width;
+    
+    // DEBUG: Log positions every few frames to see what's happening
+    if (Math.random() < 0.01) { // Log roughly every 100 frames
+      console.log(`DEBUG: Pigeon left edge=${pigeonLeftEdge}, finish line right edge=${finishLineRightEdge}, finish line at X=${finishLine.x}`);
+    }
+    
+    // LEVEL COMPLETION LOGIC: Level completes when pigeon has completely passed the finish line
+    // This happens when the finish line's RIGHT edge has scrolled past the pigeon's LEFT edge
+    if (finishLineRightEdge < pigeonLeftEdge) {
+      console.log(`LEVEL COMPLETE! Finish line right edge (${finishLineRightEdge}) scrolled past pigeon left edge (${pigeonLeftEdge})`);
+      this.levelManager.completeLevel();
+      this.gameState = "levelComplete";
+      // Stop background music immediately when completing level
+      // this.backgroundMusic.pause();
     }
   }
 
