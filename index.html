@@ -94,7 +94,7 @@
         
         #gameArea {
           width: 100vw;
-          height: 100vh;
+          height: calc(100vh - 60px); /* Reduce gameArea height to leave bottom space */
           position: fixed;
           top: 0;
           left: 0;
@@ -105,9 +105,8 @@
         }
         
         #myCanvas {
-          height: calc(100vh - 60px); /* Increased bottom padding for landscape */
-          width: calc((100vh - 60px) * 1.667); /* Maintain 5:3 aspect ratio based on available height */
-          max-width: 100vw; /* Don't exceed screen width */
+          width: 100%;
+          height: 100%;
           touch-action: none;
           border: none;
         }
