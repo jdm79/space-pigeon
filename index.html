@@ -38,7 +38,7 @@
       html,
       body {
         width: 100%;
-        height: 100vh;
+        height: 100%;
         overflow: hidden;
         position: fixed;
         background: #111;
@@ -55,26 +55,58 @@
 
       #gameArea {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         width: 100%;
         height: 100%;
       }
 
+      #uiContainer {
+        background: #000;
+        width: 800px;
+        height: 80px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        box-sizing: border-box;
+        font-family: "VT323", monospace;
+        color: white;
+        /* border: 2px solid #00ff00;
+        border-bottom: none; */
+      }
+
+      #scoreBox,
+      #levelBox,
+      #progressBox {
+        flex: 1;
+        text-align: center;
+        font-size: 16px;
+      }
+
+      #scoreBox {
+        text-align: left;
+      }
+
+      #progressBox {
+        text-align: right;
+      }
+
       #myCanvas {
         border: none;
         background: #000;
         display: block;
-        width: 100vw;
-        height: 100vh;
+        width: 800px;
+        height: 480px;
         max-width: none;
         max-height: none;
       }
 
       @media (max-height: 600px) {
         #myCanvas {
-          height: 100vh;
-          width: 100vw;
+          width: 800px;
+          height: 480px;
         }
       }
 
@@ -84,12 +116,17 @@
           padding: 0; /* No padding for portrait */
         }
 
+        #uiContainer {
+          width: 95vw;
+          height: 60px;
+        }
+
         #myCanvas {
-          width: 100vw;
+          width: 95vw;
           height: calc(
-            100vw * 0.6
+            95vw * 0.6
           ); /* Maintain 5:3 aspect ratio (height = width * 0.6) */
-          max-height: 100vh; /* Use full viewport height in portrait */
+          max-height: 90vh; /* Safe viewport height in portrait */
         }
       }
 
@@ -102,7 +139,7 @@
           overflow: hidden;
           position: fixed;
           width: 100%;
-          height: 100vh;
+          height: 100%;
         }
 
         #gameArea {
@@ -118,10 +155,16 @@
           padding: 30px; /* Safe area padding */
         }
 
+        #uiContainer {
+          width: 85vw;
+          height: 50px;
+          font-size: 14px;
+        }
+
         #myCanvas {
-          width: calc(100vw - 60px); /* Full width minus padding */
-          height: calc((100vw - 60px) * 0.6); /* Maintain 5:3 ratio */
-          max-height: calc(100vh - 100px); /* Safe height with extra margin */
+          width: 85vw; /* Smaller width for safety */
+          height: 51vw; /* Maintain 5:3 ratio (85vw * 0.6) */
+          max-height: 70vh; /* Much more conservative height */
           touch-action: none;
           border: none;
         }
@@ -132,8 +175,8 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         background: linear-gradient(
           135deg,
           #1a1a2e 0%,
@@ -235,6 +278,11 @@
     </div>
 
     <div id="gameArea">
+      <div id="uiContainer">
+        <div id="scoreBox"></div>
+        <div id="levelBox"></div>
+        <div id="progressBox"></div>
+      </div>
       <canvas id="myCanvas" width="800" height="480">
         Your browser does not support the HTML5 canvas element.
       </canvas>
