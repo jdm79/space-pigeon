@@ -14,6 +14,25 @@ class LevelManager {
       2: { obstacleCount: 19, baseSpeed: 4.2, baseDistance: 6100 },
       3: { obstacleCount: 20, baseSpeed: 4.4, baseDistance: 6200 },
     };
+
+    // Level completion messages
+    this.levelMessages = [
+      "Great job, Space Pigeon! You're getting the hang of this!",
+      "Excellent flying skills! The space winds can't stop you!",
+      "Amazing! You're becoming a true space navigator!",
+      "Incredible! Your reflexes are sharp as a laser!",
+      "Outstanding! The galaxy is in good hands with you!",
+      "Phenomenal! You're defying the laws of space physics!",
+      "Spectacular! Even black holes would be impressed!",
+      "Legendary! You're writing pigeon history in the stars!",
+      "Epic! The space academy wants to recruit you!",
+      "Godlike! You've transcended ordinary pigeon limitations!",
+      "You're unstoppable! The universe trembles before your wings!",
+      "Unbelievable! You've achieved pigeon enlightenment!",
+      "Mind-blowing! Reality bends to your will!",
+      "Impossible! You've broken the cosmic speed limit!",
+      "Transcendent! You've become one with the cosmos!"
+    ];
   }
 
   getCurrentLevel() {
@@ -183,6 +202,12 @@ class LevelManager {
     this.updateProgressDisplay(distanceTraveled);
   }
 
+  getLevelMessage() {
+    // Get message for current level, cycling through messages if level > message count
+    const messageIndex = (this.currentLevel - 1) % this.levelMessages.length;
+    return this.levelMessages[messageIndex];
+  }
+
   drawLevelComplete(context, canvasWidth, canvasHeight) {
     if (!this.levelComplete) return;
 
@@ -215,18 +240,25 @@ class LevelManager {
       //     canvasHeight / 2 + 40
       //   );
     } else {
+      // Display level completion message
+      context.fillStyle = "#00FFFF"; // Cyan for level message
+      context.font = "20px VT323, monospace";
+      const message = this.getLevelMessage();
+      context.fillText(message, canvasWidth / 2, canvasHeight / 2 - 40);
+      
+      context.font = "26px VT323, monospace";
       context.fillStyle = "#FF8800"; // Orange for next level
       context.fillText(
         `Get ready for Level ${this.currentLevel + 1}!`,
         canvasWidth / 2,
-        canvasHeight / 2 - 20
+        canvasHeight / 2
       );
       context.fillStyle = "#00FF00"; // Green for instructions
       const isMobile = "ontouchstart" in window && window.innerWidth <= 768;
       const continueText = isMobile
         ? "Touch screen to continue"
         : "Press SPACE to continue";
-      context.fillText(continueText, canvasWidth / 2, canvasHeight / 2 + 20);
+      context.fillText(continueText, canvasWidth / 2, canvasHeight / 2 + 40);
     }
 
     context.textAlign = "left";

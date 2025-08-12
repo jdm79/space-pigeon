@@ -131,7 +131,7 @@
       }
 
       /* Mobile landscape - safe viewport sizing */
-      @media (max-width: 768px) and (orientation: landscape) {
+      @media (max-width: 1024px) and (orientation: landscape) and (max-height: 768px) {
         html,
         body {
           margin: 0;
@@ -152,21 +152,23 @@
           align-items: center;
           justify-content: center;
           background: #111;
-          padding: 30px; /* Safe area padding */
+          padding: 10px; /* Reduced padding for more space */
         }
 
         #uiContainer {
-          width: 85vw;
-          height: 50px;
-          font-size: 14px;
+          width: 70vw !important; /* Increased from 40vw */
+          height: 40px !important; /* Increased from 17px */
+          font-size: 14px !important; /* Increased from 6px */
         }
 
         #myCanvas {
-          width: 85vw; /* Smaller width for safety */
-          height: 51vw; /* Maintain 5:3 ratio (85vw * 0.6) */
-          max-height: 70vh; /* Much more conservative height */
+          width: 70vw !important;
+          height: calc(70vw * 480 / 800) !important; /* Exact 800:480 ratio */
+          max-height: 50vh !important;
+          max-width: none !important;
           touch-action: none;
           border: none;
+          object-fit: contain !important; /* Prevents stretching */
         }
       }
 
